@@ -1,0 +1,32 @@
+services:
+  cascade:
+    build: .
+    container_name: cascade
+    volumes:
+      - .:/app
+      - cascade-data:/root/.cascade
+      - cascade-workspace:/app/cascade/workspace
+      - ${HOME}/.config/gh:/root/.config/gh:ro
+    ports:
+      - "8450:8450"
+    environment:
+      - CLINE_API_KEY=${CLINE_API_KEY:-}
+    entrypoint: ["python3", "-m", "cascade"]
+    command: ["dashboard", "--host", "0.0.0.0", "--port", "8450", "--config", "/app/demo/cascade.yaml"]
+
+  cascade-run:
+    build: .
+    container_name: cascade-run
+    volumes:
+      - .:/app
+      - cascade-data:/root/.cascade
+    environment:
+      - CLINE_API_KEY=${CLINE_API_KEY:-}
+    profiles:
+      - run
+    entrypoint: ["python3", "-m", "cascade"]
+    command: ["run", "--config", "/app/demo/cascade.yaml", "The /users endpoint returns full_name instead of first_name and last_name"]
+
+volumes:
+  cascade-data:
+  cascade-workspace:

@@ -1,0 +1,34 @@
+name: cross-platform-demo
+
+repos:
+  - name: backend-api
+    path: ./repos/backend-api
+    role: source
+    language: python
+    test_cmd: "python -m pytest test_api.py -v"
+
+  - name: web-dashboard
+    path: ./repos/web-dashboard
+    role: consumer
+    language: javascript
+    test_cmd: "node tests/test.js"
+
+  - name: python-sdk
+    path: ./repos/python-sdk
+    role: consumer
+    language: python
+    test_cmd: "python -m pytest test_sdk.py -v"
+
+  - name: cli-client
+    path: ./repos/cli-client
+    role: consumer
+    language: python
+    test_cmd: "python -m pytest test_cli.py -v"
+
+settings:
+  max_parallel: 4
+  timeout_per_repo: 600
+  auto_branch: true
+  branch_prefix: "cascade/"
+  retry_on_test_fail: true
+  max_retries: 2

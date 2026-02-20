@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cascade</title>
+    <style>
+        /* ── Theme Variables ──────────────────── */
+        :root, [data-theme="dark"] {
+            --bg: #060b18; --bg-card: #0c1425; --bg-elevated: #111b2e; --bg-input: #0c1425;
+            --border: #131e36; --border-hover: #1e293b;
+            --text: #e2e8f0; --text-2: #94a3b8; --text-3: #64748b; --text-4: #475569; --text-5: #334155;
+            --blue: #3b82f6; --purple: #8b5cf6; --green: #4ade80; --amber: #fb923c; --red: #f87171; --cyan: #22d3ee;
+            --card-shadow: 0 1px 4px rgba(0,0,0,.2);
+            --logo-shadow: 0 0 20px rgba(59,130,246,.25);
+            /* badge palettes */
+            --b-blue-bg: #172554; --b-blue-fg: #60a5fa;
+            --b-green-bg: #052e16; --b-green-fg: #4ade80;
+            --b-amber-bg: #451a03; --b-amber-fg: #fb923c;
+            --b-red-bg: #450a0a; --b-red-fg: #f87171;
+            --b-gray-bg: #1a1a2e; --b-gray-fg: #64748b;
+            --b-cyan-bg: #083344; --b-cyan-fg: #22d3ee;
+            --b-purple-bg: #2e1065; --b-purple-fg: #a78bfa;
+            /* banners */
+            --sync-bg: #001a0a; --sync-border: #14532d; --sync-icon-bg: #166534; --sync-fg: #4ade80; --sync-sub: #5a9e6f;
+            --drift-bg: #1c0a00; --drift-border: #78350f; --drift-icon-bg: #92400e; --drift-fg: #fbbf24; --drift-sub: #c2946a;
+            /* analytics accent tints (semi-transparent glow backgrounds) */
+            --an-blue-tint: rgba(59,130,246,.08); --an-green-tint: rgba(74,222,128,.08);
+            --an-amber-tint: rgba(251,146,60,.08); --an-red-tint: rgba(248,113,113,.08);
+            --an-purple-tint: rgba(139,92,246,.08); --an-cyan-tint: rgba(34,211,238,.08);
+            --an-bar-track: #111b2e; --an-table-row-hover: rgba(59,130,246,.04);
+            --an-tooltip-bg: #182136; --an-tooltip-border: #1e293b;
+        }
+        [data-theme="light"] {
+            --bg: #f1f5f9; --bg-card: #ffffff; --bg-elevated: #f8fafc; --bg-input: #ffffff;
+            --border: #e2e8f0; --border-hover: #cbd5e1;
+            --text: #0f172a; --text-2: #334155; --text-3: #475569; --text-4: #94a3b8; --text-5: #cbd5e1;
+            --blue: #2563eb; --purple: #7c3aed; --green: #16a34a; --amber: #d97706; --red: #dc2626; --cyan: #0891b2;
+            --card-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.02);
+            --logo-shadow: 0 0 20px rgba(59,130,246,.15);
+            --b-blue-bg: #dbeafe; --b-blue-fg: #1d4ed8;
+            --b-green-bg: #dcfce7; --b-green-fg: #15803d;
+            --b-amber-bg: #ffedd5; --b-amber-fg: #c2410c;
+            --b-red-bg: #fee2e2; --b-red-fg: #dc2626;
+            --b-gray-bg: #f1f5f9; --b-gray-fg: #64748b;
+            --b-cyan-bg: #cffafe; --b-cyan-fg: #0e7490;
+            --b-purple-bg: #ede9fe; --b-purple-fg: #6d28d9;
+            --sync-bg: #f0fdf4; --sync-border: #86efac; --sync-icon-bg: #bbf7d0; --sync-fg: #15803d; --sync-sub: #4ade80;
+            --drift-bg: #fff7ed; --drift-border: #fdba74; --drift-icon-bg: #fed7aa; --drift-fg: #c2410c; --drift-sub: #fb923c;
+            --an-blue-tint: rgba(37,99,235,.06); --an-green-tint: rgba(22,163,106,.06);
+            --an-amber-tint: rgba(217,119,6,.06); --an-red-tint: rgba(220,38,38,.06);
+            --an-purple-tint: rgba(124,58,237,.06); --an-cyan-tint: rgba(8,145,178,.06);
+            --an-bar-track: #f1f5f9; --an-table-row-hover: rgba(37,99,235,.03);
+            --an-tooltip-bg: #ffffff; --an-tooltip-border: #e2e8f0;
+        }
+
+        /* ── Reset ────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .25s, color .25s; }
+        a { color: var(--blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* ── Layout ───────────────────────────── */
+        .app { max-width: 1200px; margin: 0 auto; padding: 24px 32px 80px; }
+
+        /* ── Header ───────────────────────────── */
+        .header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .logo-area { display: flex; align-items: center; gap: 14px; }
+        .logo-mark {
+            width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4, #3b82f6);
+            background-size: 300% 300%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--logo-shadow);
+            animation: logoGlow 3s ease-in-out infinite, gradShift 6s ease infinite;
+            position: relative; overflow: hidden;
+        }
+        .logo-mark::after {
+            content: ''; position: absolute; inset: 0; border-radius: 14px;
+            background: linear-gradient(135deg, rgba(255,255,255,.15) 0%, transparent 50%, rgba(255,255,255,.08) 100%);
+        }
+        .logo-mark svg { position: relative; z-index: 1; }
+        @keyframes logoGlow {
+            0%,100% { box-shadow: 0 0 16px rgba(59,130,246,.3); }
+            33% { box-shadow: 0 0 24px rgba(139,92,246,.45); }
+            66% { box-shadow: 0 0 20px rgba(6,182,212,.35); }
+        }
+        @keyframes gradShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes cascadeDrop1 { 0%,100% { opacity:.8; transform:translateY(0); } 50% { opacity:1; transform:translateY(1px); } }
+        @keyframes cascadeDrop2 { 0%,100% { opacity:.7; transform:translateY(0); } 50% { opacity:1; transform:translateY(1.5px); } }
+        @keyframes cascadeDrop3 { 0%,100% { opacity:.6; transform:translateY(0); } 50% { opacity:1; transform:translateY(2px); } }
+        .logo-mark .c-drop1 { animation: cascadeDrop1 2.5s ease-in-out infinite; }
+        .logo-mark .c-drop2 { animation: cascadeDrop2 2.5s ease-in-out .3s infinite; }
+        .logo-mark .c-drop3 { animation: cascadeDrop3 2.5s ease-in-out .6s infinite; }
+
+        .logo-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .logo-text { font-size: 22px; font-weight: 700; letter-spacing: -.3px; }
+        .logo-sep { color: var(--text-4); font-size: 18px; }
+        .logo-subtitle { font-size: 14px; color: var(--text-3); font-weight: 400; }
+        .logo-tagline { font-size: 11px; color: var(--text-4); margin-top: 2px; }
+        .logo-tagline a { color: var(--blue); font-weight: 600; }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+
+        /* ── Theme Toggle ─────────────────────── */
+        .theme-toggle {
+            width: 44px; height: 24px; border-radius: 12px; border: none; cursor: pointer;
+            background: var(--border); position: relative; transition: background .2s;
+        }
+        .theme-toggle::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--text); transition: transform .25s, background .25s;
+        }
+        [data-theme="light"] .theme-toggle { background: var(--blue); }
+        [data-theme="light"] .theme-toggle::after { transform: translateX(20px); background: #fff; }
+        .theme-label { font-size: 11px; color: var(--text-4); }
+
+        /* ── Header Badge ─────────────────────── */
+        .header-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; border: 1px solid transparent;
+        }
+        .hb-scanning { background: var(--b-blue-bg); color: var(--b-blue-fg); border-color: var(--b-blue-bg); }
+        .hb-sync { background: var(--b-green-bg); color: var(--b-green-fg); border-color: var(--b-green-bg); }
+        .hb-drift { background: var(--b-amber-bg); color: var(--b-amber-fg); border-color: var(--b-amber-bg); }
+        .hb-running { background: var(--b-blue-bg); color: var(--b-blue-fg); border-color: var(--b-blue-bg); }
+        .hb-done { background: var(--b-green-bg); color: var(--b-green-fg); border-color: var(--b-green-bg); }
+        .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .badge-dot.pulse { animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+        /* ── Sections ─────────────────────────── */
+        .section { margin-bottom: 24px; }
+        .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
+        .section-title { font-size: 14px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .8px; }
+        .section-controls { display: flex; align-items: center; gap: 8px; }
+
+        /* ── Buttons ──────────────────────────── */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; font-family: inherit; transition: all .15s ease; }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover { filter: brightness(1.15); box-shadow: 0 0 16px rgba(59,130,246,.25); }
+        .btn-warn { background: var(--amber); color: #1c1917; }
+        .btn-warn:hover { filter: brightness(1.1); }
+        .btn-ghost { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--border-hover); color: var(--text-2); }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .btn-lg { padding: 12px 28px; font-size: 14px; font-weight: 600; }
+        .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* ── Selects ──────────────────────────── */
+        .select { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; background: var(--bg-card); color: var(--text-2); border: 1px solid var(--border); cursor: pointer; }
+
+        /* ── Stats Row ────────────────────────── */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--card-shadow); }
+        .stat-label { font-size: 10px; color: var(--text-4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .stat-value { font-size: 24px; font-weight: 700; font-family: 'SF Mono','Fira Code',monospace; }
+
+        /* ── Repo Grid ────────────────────────── */
+        .repo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+
+        .repo-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; transition: border-color .25s, box-shadow .25s; box-shadow: var(--card-shadow); }
+        .repo-card.c-source { border-left: 3px solid var(--blue); }
+        .repo-card.c-current { border-left: 3px solid var(--green); }
+        .repo-card.c-drift { border-left: 3px solid var(--amber); }
+        .repo-card.c-updated { border-left: 3px solid var(--green); }
+        .repo-card.c-active { border-color: var(--blue); box-shadow: 0 0 12px rgba(59,130,246,.1); }
+        .repo-card.c-done { border-color: var(--green); }
+        .repo-card.c-failed { border-color: var(--red); }
+
+        .repo-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .repo-name { font-size: 15px; font-weight: 600; }
+        .lang-tag { font-size: 10px; color: var(--text-4); font-family: 'SF Mono','Fira Code',monospace; background: var(--bg-elevated); padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+        .rb { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-bottom: 8px; }
+        .rb-original   { background: var(--b-blue-bg);  color: var(--b-blue-fg); }
+        .rb-current    { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .rb-updated    { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .rb-synced     { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .rb-out_of_sync{ background: var(--b-amber-bg); color: var(--b-amber-fg); }
+        .rb-clean      { background: var(--b-gray-bg);  color: var(--b-gray-fg); }
+        .rb-waiting    { background: var(--b-gray-bg);  color: var(--b-gray-fg); }
+        .rb-branching,.rb-committing { background: var(--b-amber-bg); color: var(--b-amber-fg); }
+        .rb-adapting   { background: var(--b-blue-bg);  color: var(--b-blue-fg); }
+        .rb-testing    { background: var(--b-amber-bg); color: var(--b-amber-fg); }
+        .rb-fixing     { background: var(--b-purple-bg);color: var(--b-purple-fg);}
+        .rb-reviewing  { background: var(--b-cyan-bg);  color: var(--b-cyan-fg); }
+        .rb-done       { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .rb-failed     { background: var(--b-red-bg);   color: var(--b-red-fg); }
+        .rb-skipped    { background: var(--b-gray-bg);  color: var(--b-gray-fg); }
+
+        .repo-meta { font-size: 12px; color: var(--text-4); margin-bottom: 4px; }
+        .repo-meta span { margin-right: 14px; }
+
+        .ref-list { margin-top: 6px; font-family: 'SF Mono','Fira Code',monospace; font-size: 11px; line-height: 1.7; color: var(--text-3); max-height: 110px; overflow-y: auto; }
+        .ref-file { color: var(--text-2); }
+        .ref-field { color: var(--amber); }
+        .ref-field.new { color: var(--green); }
+        .repo-error { font-size: 12px; color: var(--red); margin-top: 6px; }
+        .repo-files { font-size: 11px; color: var(--text-3); margin-top: 6px; font-family: 'SF Mono','Fira Code',monospace; }
+
+        /* ── Banners ──────────────────────────── */
+        .sync-banner { background: var(--sync-bg); border: 1px solid var(--sync-border); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .sync-left { display: flex; align-items: center; gap: 14px; }
+        .sync-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--sync-icon-bg); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: var(--sync-fg); flex-shrink: 0; }
+        .sync-title { font-size: 16px; font-weight: 600; color: var(--sync-fg); }
+        .sync-desc { font-size: 13px; color: var(--sync-sub); margin-top: 2px; }
+
+        .drift-banner { background: var(--drift-bg); border: 1px solid var(--drift-border); border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; }
+        .drift-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+        .drift-icon { width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; background: var(--drift-icon-bg); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: var(--drift-fg); }
+        .drift-title { font-size: 17px; font-weight: 700; color: var(--drift-fg); margin-bottom: 4px; }
+        .drift-desc { font-size: 13px; color: var(--drift-sub); line-height: 1.6; }
+        .drift-actions { display: flex; gap: 12px; align-items: center; margin-top: 16px; }
+        .drift-change { flex: 1; font-size: 12px; color: var(--text-2); font-family: 'SF Mono','Fira Code',monospace; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ── Log ───────────────────────────────── */
+        .log-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--card-shadow); }
+        .log { font-family: 'SF Mono','Fira Code',monospace; font-size: 11px; line-height: 1.9; max-height: 240px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; color: var(--text-3); }
+        .log .ts { color: var(--text-5); }
+        .log .ev { color: var(--b-blue-fg); }
+        .log .ok { color: var(--green); }
+        .log .err { color: var(--red); }
+        .log .warn { color: var(--amber); }
+
+        /* ── Connection Dot ────────────────────── */
+        .conn { position: fixed; bottom: 14px; right: 22px; display: flex; align-items: center; gap: 6px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 11px; font-size: 11px; color: var(--text-4); box-shadow: var(--card-shadow); }
+        .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); transition: background .3s; }
+        .conn-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+        /* ── Frequency counter ─────────────────── */
+        .freq-counter { font-size: 11px; color: var(--text-4); font-family: 'SF Mono','Fira Code',monospace; }
+
+        /* ── GitHub Import Panel ───────────────── */
+        .gh-panel {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 22px 24px; margin-bottom: 24px; box-shadow: var(--card-shadow);
+        }
+        .gh-panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; margin-bottom: 0; transition: margin .2s;
+        }
+        .gh-panel-header.open { margin-bottom: 18px; }
+        .gh-panel-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 15px; font-weight: 600;
+        }
+        .gh-icon {
+            width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+            background: linear-gradient(135deg, #333, #24292e);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: #fff;
+        }
+        [data-theme="light"] .gh-icon { background: linear-gradient(135deg, #24292e, #555); }
+        .gh-chevron { font-size: 16px; color: var(--text-4); transition: transform .2s; }
+        .gh-chevron.open { transform: rotate(180deg); }
+        .gh-body { display: none; }
+        .gh-body.open { display: block; }
+
+        .gh-row { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+        .gh-textarea {
+            width: 100%; min-height: 90px; border-radius: 8px; padding: 12px 14px;
+            font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; line-height: 1.7;
+            background: var(--bg-input); color: var(--text); border: 1px solid var(--border);
+            resize: vertical; transition: border-color .2s;
+        }
+        .gh-textarea:focus { outline: none; border-color: var(--blue); }
+        .gh-textarea::placeholder { color: var(--text-5); }
+
+        .gh-source-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .gh-source-label { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+        .gh-source-select {
+            flex: 1; padding: 8px 12px; border-radius: 8px; font-size: 13px;
+            font-family: inherit; background: var(--bg-input); color: var(--text);
+            border: 1px solid var(--border); cursor: pointer;
+        }
+
+        .gh-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .gh-status { font-size: 12px; color: var(--text-3); }
+        .gh-status .ok { color: var(--green); }
+        .gh-status .err { color: var(--red); }
+
+        .gh-cloned-list { margin-top: 14px; }
+        .gh-cloned-item {
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+            background: var(--bg-elevated); border-radius: 8px; margin-bottom: 6px;
+            font-size: 13px;
+        }
+        .gh-cloned-name { font-weight: 600; flex: 1; }
+        .gh-cloned-role {
+            padding: 2px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
+            cursor: pointer; transition: all .15s;
+        }
+        .gh-cloned-role.source { background: var(--b-blue-bg); color: var(--b-blue-fg); }
+        .gh-cloned-role.consumer { background: var(--b-gray-bg); color: var(--b-gray-fg); }
+
+        /* ── PR Panel ─────────────────────────── */
+        .pr-panel {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 22px 24px; margin-bottom: 24px; box-shadow: var(--card-shadow);
+        }
+        .pr-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .pr-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .pr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+        .pr-card {
+            background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px;
+            padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+        }
+        .pr-card.success { border-left: 3px solid var(--green); }
+        .pr-card.failed { border-left: 3px solid var(--red); }
+        .pr-card.pending { border-left: 3px solid var(--text-4); }
+        .pr-info { flex: 1; }
+        .pr-repo { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+        .pr-branch { font-size: 11px; color: var(--text-3); font-family: monospace; }
+        .pr-link { font-size: 12px; }
+        .pr-link a { color: var(--green); font-weight: 600; }
+        .pr-err { font-size: 11px; color: var(--red); margin-top: 2px; }
+        .pr-icon { font-size: 20px; flex-shrink: 0; }
+
+        /* ── Tab Switcher ─────────────────────── */
+        .mode-tabs { display: flex; gap: 2px; background: var(--bg-elevated); border-radius: 10px; padding: 3px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .mode-tab {
+            flex: 1; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer;
+            font-family: inherit; font-size: 13px; font-weight: 500;
+            background: transparent; color: var(--text-3); transition: all .15s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .mode-tab:hover { color: var(--text); }
+        .mode-tab.active { background: var(--bg-card); color: var(--text); box-shadow: var(--card-shadow); font-weight: 600; }
+        .mode-tab .tab-icon { font-size: 15px; }
+
+        .mode-content { display: none; }
+        .mode-content.active { display: block; }
+
+        /* ── Sub-nav (Demo / GitHub toggle) ── */
+        .sub-nav { display: flex; gap: 2px; margin-bottom: 20px; }
+        .sub-nav-btn {
+            padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-3); font-family: inherit;
+            font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .sub-nav-btn:hover { color: var(--text); border-color: var(--border-hover); }
+        .sub-nav-btn.active {
+            background: var(--blue); color: #fff; border-color: var(--blue);
+            box-shadow: 0 2px 8px rgba(59,130,246,.2);
+        }
+        [data-theme="light"] .sub-nav-btn.active { box-shadow: 0 2px 8px rgba(37,99,235,.15); }
+        .sub-pane { display: none; }
+        .sub-pane.active { display: block; }
+
+        /* ── Analytics ─────────────────────────── */
+        .an-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+        .an-metric {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 20px 22px; box-shadow: var(--card-shadow); position: relative; overflow: hidden;
+            transition: transform .15s, box-shadow .15s;
+        }
+        .an-metric:hover { transform: translateY(-2px); box-shadow: var(--card-shadow), 0 4px 12px rgba(0,0,0,.08); }
+        .an-metric::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 14px 14px 0 0;
+        }
+        .an-metric.blue  { background: linear-gradient(to bottom, var(--an-blue-tint), var(--bg-card) 60%); }
+        .an-metric.blue::before  { background: linear-gradient(90deg, var(--blue), transparent); }
+        .an-metric.green { background: linear-gradient(to bottom, var(--an-green-tint), var(--bg-card) 60%); }
+        .an-metric.green::before { background: linear-gradient(90deg, var(--green), transparent); }
+        .an-metric.amber { background: linear-gradient(to bottom, var(--an-amber-tint), var(--bg-card) 60%); }
+        .an-metric.amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
+        .an-metric.red   { background: linear-gradient(to bottom, var(--an-red-tint), var(--bg-card) 60%); }
+        .an-metric.red::before   { background: linear-gradient(90deg, var(--red), transparent); }
+        .an-metric.purple{ background: linear-gradient(to bottom, var(--an-purple-tint), var(--bg-card) 60%); }
+        .an-metric.purple::before{ background: linear-gradient(90deg, var(--purple), transparent); }
+        .an-metric.cyan  { background: linear-gradient(to bottom, var(--an-cyan-tint), var(--bg-card) 60%); }
+        .an-metric.cyan::before  { background: linear-gradient(90deg, var(--cyan), transparent); }
+
+        .an-metric-icon {
+            width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; font-size: 16px; margin-bottom: 12px; flex-shrink: 0;
+        }
+        .an-metric.blue  .an-metric-icon { background: var(--b-blue-bg); color: var(--b-blue-fg); }
+        .an-metric.green .an-metric-icon { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .an-metric.amber .an-metric-icon { background: var(--b-amber-bg); color: var(--b-amber-fg); }
+        .an-metric.red   .an-metric-icon { background: var(--b-red-bg); color: var(--b-red-fg); }
+        .an-metric.purple .an-metric-icon { background: var(--b-purple-bg); color: var(--b-purple-fg); }
+        .an-metric.cyan  .an-metric-icon { background: var(--b-cyan-bg); color: var(--b-cyan-fg); }
+
+        .an-metric-label {
+            font-size: 11px; color: var(--text-3); text-transform: uppercase;
+            letter-spacing: .6px; font-weight: 500; margin-bottom: 6px;
+        }
+        .an-metric-value {
+            font-size: 32px; font-weight: 800;
+            font-family: 'SF Mono','Fira Code','Cascadia Code',monospace;
+            line-height: 1; letter-spacing: -1px;
+        }
+        .an-metric.blue  .an-metric-value { color: var(--blue); }
+        .an-metric.green .an-metric-value { color: var(--green); }
+        .an-metric.amber .an-metric-value { color: var(--amber); }
+        .an-metric.red   .an-metric-value { color: var(--red); }
+        .an-metric.purple .an-metric-value { color: var(--purple); }
+        .an-metric.cyan  .an-metric-value { color: var(--cyan); }
+        .an-metric-sub {
+            font-size: 12px; color: var(--text-4); margin-top: 6px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .an-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .an-panel {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 22px 24px; box-shadow: var(--card-shadow);
+        }
+        .an-panel-title {
+            font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase;
+            letter-spacing: .8px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+        }
+        .an-panel-title::before {
+            content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--blue);
+        }
+
+        .an-bar-group { margin-bottom: 14px; }
+        .an-bar-group:last-child { margin-bottom: 0; }
+        .an-bar-label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 6px; }
+        .an-bar-name { color: var(--text); font-weight: 500; }
+        .an-bar-count {
+            color: var(--text-2); font-family: 'SF Mono','Fira Code',monospace;
+            font-weight: 700; font-size: 13px;
+        }
+        .an-bar-track { width: 100%; height: 10px; background: var(--an-bar-track); border-radius: 5px; overflow: hidden; }
+        .an-bar-fill {
+            height: 100%; border-radius: 5px; min-width: 3px;
+            transition: width .5s cubic-bezier(.4,0,.2,1);
+        }
+        .an-bar-fill.blue   { background: linear-gradient(90deg, var(--blue), #60a5fa); }
+        .an-bar-fill.green  { background: linear-gradient(90deg, var(--green), #86efac); }
+        .an-bar-fill.amber  { background: linear-gradient(90deg, var(--amber), #fcd34d); }
+        .an-bar-fill.red    { background: linear-gradient(90deg, var(--red), #fca5a5); }
+        .an-bar-fill.purple { background: linear-gradient(90deg, var(--purple), #c4b5fd); }
+        .an-bar-fill.cyan   { background: linear-gradient(90deg, var(--cyan), #67e8f9); }
+        [data-theme="light"] .an-bar-fill.blue   { background: linear-gradient(90deg, var(--blue), #93c5fd); }
+        [data-theme="light"] .an-bar-fill.green  { background: linear-gradient(90deg, var(--green), #86efac); }
+        [data-theme="light"] .an-bar-fill.amber  { background: linear-gradient(90deg, var(--amber), #fde68a); }
+        [data-theme="light"] .an-bar-fill.red    { background: linear-gradient(90deg, var(--red), #fca5a5); }
+        [data-theme="light"] .an-bar-fill.purple { background: linear-gradient(90deg, var(--purple), #c4b5fd); }
+        [data-theme="light"] .an-bar-fill.cyan   { background: linear-gradient(90deg, var(--cyan), #a5f3fc); }
+
+        .an-timeline {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 22px 24px; box-shadow: var(--card-shadow); margin-bottom: 24px;
+        }
+        .an-tl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .an-tl-title {
+            font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase;
+            letter-spacing: .8px; display: flex; align-items: center; gap: 8px;
+        }
+        .an-tl-title::before { content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--cyan); }
+        .an-tl-range {
+            font-size: 11px; color: var(--text-4);
+            font-family: 'SF Mono','Fira Code',monospace;
+            background: var(--bg-elevated); padding: 3px 10px; border-radius: 6px;
+        }
+        .an-tl-chart {
+            display: flex; align-items: flex-end; gap: 3px; height: 100px;
+            padding: 6px 0; border-bottom: 1px solid var(--border);
+        }
+        .an-tl-bar {
+            flex: 1; min-width: 6px; border-radius: 3px 3px 0 0;
+            background: linear-gradient(to top, var(--blue), #60a5fa);
+            opacity: .55; transition: height .3s ease, opacity .15s, background .15s;
+            position: relative; cursor: default;
+        }
+        [data-theme="light"] .an-tl-bar { background: linear-gradient(to top, var(--blue), #93c5fd); }
+        .an-tl-bar:hover { opacity: 1; }
+        .an-tl-bar::after {
+            content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%;
+            transform: translateX(-50%); font-size: 11px; color: var(--text);
+            background: var(--an-tooltip-bg); border: 1px solid var(--an-tooltip-border);
+            border-radius: 6px; padding: 4px 10px; white-space: nowrap;
+            pointer-events: none; opacity: 0; transition: opacity .15s;
+            box-shadow: 0 4px 12px rgba(0,0,0,.15); z-index: 10;
+            font-family: 'SF Mono','Fira Code',monospace; font-weight: 500;
+        }
+        .an-tl-bar:hover::after { opacity: 1; }
+        .an-tl-labels { display: flex; justify-content: space-between; padding-top: 8px; }
+        .an-tl-labels span {
+            font-size: 10px; color: var(--text-4);
+            font-family: 'SF Mono','Fira Code',monospace;
+        }
+
+        .an-table-wrap {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 22px 24px; box-shadow: var(--card-shadow);
+        }
+        .an-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+        .an-table-title {
+            font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase;
+            letter-spacing: .8px; display: flex; align-items: center; gap: 8px;
+        }
+        .an-table-title::before { content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--purple); }
+        .an-filter-row { display: flex; gap: 4px; align-items: center; }
+        .an-filter-btn {
+            padding: 5px 12px; border-radius: 8px; font-size: 12px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-3); cursor: pointer;
+            font-family: inherit; font-weight: 500; transition: all .15s;
+        }
+        .an-filter-btn:hover { border-color: var(--border-hover); color: var(--text); background: var(--bg-elevated); }
+        .an-filter-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 2px 8px rgba(59,130,246,.25); }
+        [data-theme="light"] .an-filter-btn.active { box-shadow: 0 2px 8px rgba(37,99,235,.2); }
+        .an-table { width: 100%; max-height: 360px; overflow-y: auto; }
+        .an-table::-webkit-scrollbar { width: 6px; }
+        .an-table::-webkit-scrollbar-track { background: transparent; }
+        .an-table::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .an-table::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+        .an-table table { width: 100%; border-collapse: collapse; }
+        .an-table th {
+            text-align: left; font-size: 11px; color: var(--text-4); text-transform: uppercase;
+            letter-spacing: .6px; padding: 10px 14px; border-bottom: 2px solid var(--border);
+            position: sticky; top: 0; background: var(--bg-card); font-weight: 600; z-index: 2;
+        }
+        .an-table td {
+            font-size: 13px; padding: 10px 14px; border-bottom: 1px solid var(--border);
+            color: var(--text-2); transition: background .1s;
+        }
+        .an-table tr:hover td { background: var(--an-table-row-hover); }
+        .an-table td.ts-col {
+            font-family: 'SF Mono','Fira Code',monospace; color: var(--text-4);
+            white-space: nowrap; font-size: 12px;
+        }
+        .an-table td.type-col { font-weight: 600; font-size: 12px; }
+        .an-table td.type-col .type-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;
+        }
+        .an-table td.type-col.cat-cascade { color: var(--b-blue-fg); }
+        .an-table td.type-col.cat-cascade .type-badge { background: var(--b-blue-bg); }
+        .an-table td.type-col.cat-repo { color: var(--b-cyan-fg); }
+        .an-table td.type-col.cat-repo .type-badge { background: var(--b-cyan-bg); }
+        .an-table td.type-col.cat-github { color: var(--b-purple-fg); }
+        .an-table td.type-col.cat-github .type-badge { background: var(--b-purple-bg); }
+        .an-table td.type-col.cat-detect { color: var(--b-amber-fg); }
+        .an-table td.type-col.cat-detect .type-badge { background: var(--b-amber-bg); }
+        .an-table td.type-col.cat-ui { color: var(--b-gray-fg); }
+        .an-table td.type-col.cat-ui .type-badge { background: var(--b-gray-bg); }
+        .an-table td.detail-col {
+            color: var(--text-3); max-width: 420px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap; font-size: 12px;
+        }
+
+        .an-empty {
+            text-align: center; padding: 48px 20px; color: var(--text-4); font-size: 13px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .an-metrics { grid-template-columns: repeat(2, 1fr); }
+            .an-row { grid-template-columns: 1fr; }
+        }
+
+        /* ── About Page ────────────────────────── */
+        .about-hero {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 40px 36px; margin-bottom: 24px; box-shadow: var(--card-shadow);
+            position: relative; overflow: hidden;
+        }
+        .about-hero::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--blue), var(--purple), var(--cyan));
+        }
+        .about-hero-title {
+            font-size: 28px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .about-hero-sub { font-size: 15px; color: var(--text-2); line-height: 1.7; max-width: 720px; margin-bottom: 20px; }
+        .about-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+        .about-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+        .about-badge.blue { background: var(--b-blue-bg); color: var(--b-blue-fg); }
+        .about-badge.green { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .about-badge.purple { background: var(--b-purple-bg); color: var(--b-purple-fg); }
+        .about-badge.cyan { background: var(--b-cyan-bg); color: var(--b-cyan-fg); }
+        .about-badge.amber { background: var(--b-amber-bg); color: var(--b-amber-fg); }
+
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .about-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 24px 26px; box-shadow: var(--card-shadow);
+            transition: transform .15s, box-shadow .15s;
+        }
+        .about-card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow), 0 6px 16px rgba(0,0,0,.06); }
+        .about-card-icon {
+            width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center;
+            justify-content: center; font-size: 18px; margin-bottom: 14px;
+        }
+        .about-card-icon.blue { background: var(--b-blue-bg); color: var(--b-blue-fg); }
+        .about-card-icon.green { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .about-card-icon.purple { background: var(--b-purple-bg); color: var(--b-purple-fg); }
+        .about-card-icon.amber { background: var(--b-amber-bg); color: var(--b-amber-fg); }
+        .about-card-icon.cyan { background: var(--b-cyan-bg); color: var(--b-cyan-fg); }
+        .about-card-icon.red { background: var(--b-red-bg); color: var(--b-red-fg); }
+        .about-card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .about-card-desc { font-size: 13px; color: var(--text-3); line-height: 1.7; }
+
+        .about-section {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 28px 30px; box-shadow: var(--card-shadow); margin-bottom: 24px;
+        }
+        .about-section-title {
+            font-size: 13px; font-weight: 600; color: var(--text-3); text-transform: uppercase;
+            letter-spacing: .8px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+        }
+        .about-section-title .dot { width: 4px; height: 14px; border-radius: 2px; }
+
+        .about-flow { display: flex; flex-direction: column; gap: 0; }
+        .about-flow-step {
+            display: flex; gap: 16px; align-items: flex-start; position: relative;
+            padding-bottom: 24px;
+        }
+        .about-flow-step:last-child { padding-bottom: 0; }
+        .about-flow-num {
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; z-index: 1;
+            font-family: 'SF Mono','Fira Code',monospace;
+        }
+        .about-flow-step:not(:last-child) .about-flow-num::after {
+            content: ''; position: absolute; left: 15px; top: 32px; width: 2px;
+            height: calc(100% - 32px); background: var(--border); z-index: 0;
+        }
+        .about-flow-num.blue { background: var(--b-blue-bg); color: var(--b-blue-fg); }
+        .about-flow-num.green { background: var(--b-green-bg); color: var(--b-green-fg); }
+        .about-flow-num.amber { background: var(--b-amber-bg); color: var(--b-amber-fg); }
+        .about-flow-num.purple { background: var(--b-purple-bg); color: var(--b-purple-fg); }
+        .about-flow-num.cyan { background: var(--b-cyan-bg); color: var(--b-cyan-fg); }
+        .about-flow-num.red { background: var(--b-red-bg); color: var(--b-red-fg); }
+        .about-flow-body { flex: 1; padding-top: 4px; }
+        .about-flow-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+        .about-flow-desc { font-size: 13px; color: var(--text-3); line-height: 1.6; }
+        .about-flow-cmd {
+            display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 6px;
+            font-family: 'SF Mono','Fira Code',monospace; font-size: 11px;
+            background: var(--bg-elevated); color: var(--text-2); border: 1px solid var(--border);
+        }
+
+        .about-tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .about-tech {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            background: var(--bg-elevated); border-radius: 10px; border: 1px solid var(--border);
+            transition: border-color .15s;
+        }
+        .about-tech:hover { border-color: var(--border-hover); }
+        .about-tech-icon { font-size: 22px; flex-shrink: 0; width: 32px; text-align: center; }
+        .about-tech-name { font-size: 13px; font-weight: 600; }
+        .about-tech-role { font-size: 11px; color: var(--text-4); }
+
+        .about-refs { display: flex; flex-direction: column; gap: 10px; }
+        .about-ref {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            background: var(--bg-elevated); border-radius: 10px; border: 1px solid var(--border);
+            transition: border-color .15s, background .15s; text-decoration: none; color: var(--text);
+        }
+        .about-ref:hover { border-color: var(--blue); background: var(--an-blue-tint); text-decoration: none; }
+        .about-ref-icon { font-size: 18px; flex-shrink: 0; width: 28px; text-align: center; }
+        .about-ref-text { flex: 1; }
+        .about-ref-title { font-size: 13px; font-weight: 600; }
+        .about-ref-url { font-size: 11px; color: var(--text-4); font-family: 'SF Mono','Fira Code',monospace; }
+        .about-ref-arrow { color: var(--text-4); font-size: 14px; transition: transform .15s; }
+        .about-ref:hover .about-ref-arrow { transform: translateX(3px); color: var(--blue); }
+
+        @media (max-width: 768px) {
+            .about-grid { grid-template-columns: 1fr; }
+            .about-hero { padding: 28px 22px; }
+            .about-hero-title { font-size: 22px; }
+            .about-tech-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* ── Utilities ─────────────────────────── */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn .3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .app { padding: 14px; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .repo-grid { grid-template-columns: 1fr; }
+            .drift-actions { flex-direction: column; }
+            .drift-change { width: 100%; }
+            .header { flex-direction: column; gap: 14px; align-items: flex-start; }
+            .logo-row { flex-direction: column; gap: 2px; }
+            .mode-tabs { flex-direction: column; }
+            .gh-source-row { flex-direction: column; align-items: flex-start; }
+            .pr-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- ── Header ───────────────────────── -->
+    <header class="header">
+        <div class="logo-area">
+            <div class="logo-mark">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect class="c-drop1" x="4" y="2" width="16" height="4" rx="2" fill="white" opacity=".9"/>
+                    <rect class="c-drop2" x="6" y="9" width="12" height="4" rx="2" fill="white" opacity=".75"/>
+                    <rect class="c-drop3" x="8" y="16" width="8" height="4" rx="2" fill="white" opacity=".6"/>
+                    <circle cx="12" cy="23" r="1.2" fill="white" opacity=".45"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-row">
+                    <span class="logo-text">Cascade</span>
+                    <span class="logo-sep">&middot;</span>
+                    <span class="logo-subtitle">Multi-Repo Change Propagator</span>
+                </div>
+                <div class="logo-tagline">Built using <a href="https://cline.bot" target="_blank">Cline CLI</a></div>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="theme-label" id="theme-label">Dark</span>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+            <div class="header-badge hb-scanning" id="global-badge">
+                <div class="badge-dot pulse"></div>
+                <span>Scanning...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── Mode Tabs ────────────────────── -->
+    <div class="mode-tabs">
+        <button class="mode-tab active" id="tab-about" onclick="switchMode('about')">
+            <span class="tab-icon">&#x24D8;</span> About
+        </button>
+        <button class="mode-tab" id="tab-cascade" onclick="switchMode('cascade')">
+            <span class="tab-icon">&#x21C4;</span> Cascade
+        </button>
+        <button class="mode-tab" id="tab-analytics" onclick="switchMode('analytics')">
+            <span class="tab-icon">&#x2261;</span> Analytics
+        </button>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- ── CASCADE TAB (Demo + GitHub) ────────  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="mode-content" id="mode-cascade">
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" id="sub-demo" onclick="switchSub('demo')">
+                <span>&#x2699;</span> Demo Mode
+            </button>
+            <button class="sub-nav-btn" id="sub-github" onclick="switchSub('github')">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="opacity:.7"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                GitHub Repos
+            </button>
+        </div>
+
+        <!-- ── Sub-pane: Demo ──────────────── -->
+        <div class="sub-pane active" id="pane-demo">
+        <div id="banner-area"></div>
+        <div class="stats" id="stats-row">
+            <div class="stat-card"><div class="stat-label">Repos</div><div class="stat-value" id="s-repos">-</div></div>
+            <div class="stat-card"><div class="stat-label">In Sync</div><div class="stat-value" id="s-sync" style="color:var(--green)">-</div></div>
+            <div class="stat-card"><div class="stat-label">Out of Sync</div><div class="stat-value" id="s-drift" style="color:var(--amber)">-</div></div>
+            <div class="stat-card"><div class="stat-label">Old References</div><div class="stat-value" id="s-refs" style="color:var(--red)">-</div></div>
+        </div>
+        <div class="section" id="detect-section">
+            <div class="section-head">
+                <div class="section-title">Repository Analysis</div>
+                <div class="section-controls">
+                    <span class="freq-counter" id="freq-counter"></span>
+                    <select class="select" id="freq-select" onchange="setAutoDetect(this.value)">
+                        <option value="0">Manual</option>
+                        <option value="10">Every 10s</option>
+                        <option value="30" selected>Every 30s</option>
+                        <option value="60">Every 1 min</option>
+                        <option value="300">Every 5 min</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" onclick="runDetection()">Rescan</button>
+                </div>
+            </div>
+            <div class="repo-grid" id="detect-grid"></div>
+        </div>
+        <div class="section hidden" id="prop-section">
+            <div class="section-head">
+                <div class="section-title">Propagation Progress</div>
+                <div id="prop-timer" style="font-family:monospace;font-size:13px;color:var(--text-3)"></div>
+            </div>
+            <div class="stats" id="prop-stats">
+                <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="p-total">-</div></div>
+                <div class="stat-card"><div class="stat-label">Succeeded</div><div class="stat-value" id="p-ok" style="color:var(--green)">-</div></div>
+                <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-value" id="p-fail" style="color:var(--red)">-</div></div>
+                <div class="stat-card"><div class="stat-label">Duration</div><div class="stat-value" id="p-dur">-</div></div>
+            </div>
+            <div class="repo-grid" id="prop-grid"></div>
+        </div>
+        </div><!-- /pane-demo -->
+
+        <!-- ── Sub-pane: GitHub ────────────── -->
+        <div class="sub-pane" id="pane-github">
+        <!-- ── GitHub Import Panel ───────── -->
+        <div class="gh-panel" id="gh-import-panel">
+            <div class="gh-panel-header open" onclick="toggleGHPanel()">
+                <div class="gh-panel-title">
+                    <div class="gh-icon">
+                        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                    </div>
+                    Import from GitHub
+                </div>
+                <span class="gh-chevron open" id="gh-chevron">&#x25BC;</span>
+            </div>
+            <div class="gh-body open" id="gh-body">
+                <div class="gh-row">
+                    <textarea class="gh-textarea" id="gh-urls"
+                        placeholder="Enter GitHub repository URLs (one per line)&#10;&#10;Examples:&#10;  https://github.com/owner/backend-api&#10;  owner/web-frontend&#10;  owner/mobile-app"></textarea>
+                </div>
+                <div class="gh-source-row">
+                    <span class="gh-source-label">Source (origin) repo:</span>
+                    <select class="gh-source-select" id="gh-source-select">
+                        <option value="">-- Select after import --</option>
+                    </select>
+                </div>
+                <div class="gh-actions">
+                    <button class="btn btn-primary" id="gh-import-btn" onclick="ghImport()">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="margin-right:2px">
+                            <path d="M2.5 1A1.5 1.5 0 001 2.5v10A1.5 1.5 0 002.5 14h3.757a.5.5 0 010 1H2.5A2.5 2.5 0 010 12.5v-10A2.5 2.5 0 012.5 0h10A2.5 2.5 0 0115 2.5v3.757a.5.5 0 01-1 0V2.5A1.5 1.5 0 0012.5 1h-10z"/>
+                            <path d="M6 5.5A1.5 1.5 0 017.5 4h6A1.5 1.5 0 0115 5.5v9a1.5 1.5 0 01-1.5 1.5h-6A1.5 1.5 0 016 14.5v-9zM7.5 5a.5.5 0 00-.5.5v9a.5.5 0 00.5.5h6a.5.5 0 00.5-.5v-9a.5.5 0 00-.5-.5h-6z"/>
+                        </svg>
+                        Import &amp; Scan
+                    </button>
+                    <button class="btn btn-ghost btn-sm" id="gh-detect-btn" onclick="ghDetect()" disabled>Re-scan</button>
+                    <span class="gh-status" id="gh-status"></span>
+                </div>
+                <div class="gh-cloned-list" id="gh-cloned-list"></div>
+            </div>
+        </div>
+
+        <!-- ── GitHub Detection Banner ────── -->
+        <div id="gh-banner-area"></div>
+
+        <!-- ── GitHub Stats ──────────────── -->
+        <div class="stats hidden" id="gh-stats-row">
+            <div class="stat-card"><div class="stat-label">Repos</div><div class="stat-value" id="gh-s-repos">-</div></div>
+            <div class="stat-card"><div class="stat-label">In Sync</div><div class="stat-value" id="gh-s-sync" style="color:var(--green)">-</div></div>
+            <div class="stat-card"><div class="stat-label">Out of Sync</div><div class="stat-value" id="gh-s-drift" style="color:var(--amber)">-</div></div>
+            <div class="stat-card"><div class="stat-label">Old References</div><div class="stat-value" id="gh-s-refs" style="color:var(--red)">-</div></div>
+        </div>
+
+        <!-- ── GitHub Repo Grid ──────────── -->
+        <div class="section hidden" id="gh-detect-section">
+            <div class="section-head">
+                <div class="section-title">GitHub Repository Analysis</div>
+            </div>
+            <div class="repo-grid" id="gh-detect-grid"></div>
+        </div>
+
+        <!-- ── GitHub Propagation Monitor ── -->
+        <div class="section hidden" id="gh-prop-section">
+            <div class="section-head">
+                <div class="section-title">Propagation Progress</div>
+                <div id="gh-prop-timer" style="font-family:monospace;font-size:13px;color:var(--text-3)"></div>
+            </div>
+            <div class="stats">
+                <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="gh-p-total">-</div></div>
+                <div class="stat-card"><div class="stat-label">Succeeded</div><div class="stat-value" id="gh-p-ok" style="color:var(--green)">-</div></div>
+                <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-value" id="gh-p-fail" style="color:var(--red)">-</div></div>
+                <div class="stat-card"><div class="stat-label">Duration</div><div class="stat-value" id="gh-p-dur">-</div></div>
+            </div>
+            <div class="repo-grid" id="gh-prop-grid"></div>
+        </div>
+
+        <!-- ── PR Panel ──────────────────── -->
+        <div class="hidden" id="gh-pr-panel">
+            <div class="pr-panel">
+                <div class="pr-header">
+                    <div class="pr-title">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--green)">
+                            <path d="M1.5 3.25a2.25 2.25 0 113 2.122v5.256a2.251 2.251 0 11-1.5 0V5.372A2.25 2.25 0 011.5 3.25zm5.677-.177L9.573.677A.25.25 0 0110 .854V2.5h1A2.5 2.5 0 0113.5 5v5.628a2.251 2.251 0 11-1.5 0V5a1 1 0 00-1-1h-1v1.646a.25.25 0 01-.427.177L7.177 3.427a.25.25 0 010-.354z"/>
+                        </svg>
+                        Pull Requests
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="gh-create-prs-btn" onclick="ghCreatePRs()">Create All PRs</button>
+                </div>
+                <div class="pr-grid" id="gh-pr-grid"></div>
+            </div>
+        </div>
+        </div><!-- /pane-github -->
+    </div><!-- /mode-cascade -->
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- ── ANALYTICS MODE CONTENT ────────────  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="mode-content" id="mode-analytics">
+        <!-- ── Top Metrics ───────────────── -->
+        <div class="an-metrics" id="an-metrics">
+            <div class="an-metric blue">
+                <div class="an-metric-icon">&#x26A1;</div>
+                <div class="an-metric-label">Total Events</div>
+                <div class="an-metric-value" id="an-total">0</div>
+                <div class="an-metric-sub" id="an-session-time">Session: 0m</div>
+            </div>
+            <div class="an-metric green">
+                <div class="an-metric-icon">&#x1F50D;</div>
+                <div class="an-metric-label">Scans Run</div>
+                <div class="an-metric-value" id="an-scans">0</div>
+                <div class="an-metric-sub" id="an-drift-rate">Drift rate: --</div>
+            </div>
+            <div class="an-metric amber">
+                <div class="an-metric-icon">&#x21C4;</div>
+                <div class="an-metric-label">Propagations</div>
+                <div class="an-metric-value" id="an-props">0</div>
+                <div class="an-metric-sub" id="an-avg-dur">Avg duration: --</div>
+            </div>
+            <div class="an-metric cyan">
+                <div class="an-metric-icon">&#x2699;</div>
+                <div class="an-metric-label">Repos Processed</div>
+                <div class="an-metric-value" id="an-repos">0</div>
+                <div class="an-metric-sub" id="an-success-rate">Success rate: --</div>
+            </div>
+            <div class="an-metric purple">
+                <div class="an-metric-icon">&#x2442;</div>
+                <div class="an-metric-label">PRs Created</div>
+                <div class="an-metric-value" id="an-prs">0</div>
+                <div class="an-metric-sub" id="an-pr-rate">Success rate: --</div>
+            </div>
+            <div class="an-metric red">
+                <div class="an-metric-icon">&#x26A0;</div>
+                <div class="an-metric-label">Errors</div>
+                <div class="an-metric-value" id="an-errors">0</div>
+                <div class="an-metric-sub" id="an-error-rate">Error rate: --</div>
+            </div>
+        </div>
+
+        <!-- ── Activity Timeline ─────────── -->
+        <div class="an-timeline">
+            <div class="an-tl-header">
+                <div class="an-tl-title">Activity Timeline</div>
+                <div class="an-tl-range" id="an-tl-range">--</div>
+            </div>
+            <div class="an-tl-chart" id="an-tl-chart"></div>
+            <div class="an-tl-labels" id="an-tl-labels"></div>
+        </div>
+
+        <!-- ── Breakdown + Repo Performance ── -->
+        <div class="an-row">
+            <div class="an-panel">
+                <div class="an-panel-title">Event Breakdown</div>
+                <div id="an-breakdown"></div>
+            </div>
+            <div class="an-panel">
+                <div class="an-panel-title">Repo Performance</div>
+                <div id="an-repo-perf"></div>
+            </div>
+        </div>
+
+        <!-- ── Event History Table ────────── -->
+        <div class="an-table-wrap">
+            <div class="an-table-header">
+                <div class="an-table-title">Event History</div>
+                <div class="an-filter-row">
+                    <button class="an-filter-btn active" data-filter="all" onclick="anFilter('all',this)">All</button>
+                    <button class="an-filter-btn" data-filter="cascade" onclick="anFilter('cascade',this)">Cascade</button>
+                    <button class="an-filter-btn" data-filter="repo" onclick="anFilter('repo',this)">Repo</button>
+                    <button class="an-filter-btn" data-filter="detect" onclick="anFilter('detect',this)">Detection</button>
+                    <button class="an-filter-btn" data-filter="github" onclick="anFilter('github',this)">GitHub</button>
+                    <button class="an-filter-btn" data-filter="ui" onclick="anFilter('ui',this)">UI</button>
+                </div>
+            </div>
+            <div class="an-table" id="an-table">
+                <table>
+                    <thead><tr><th style="width:100px">Time</th><th style="width:130px">Type</th><th>Detail</th></tr></thead>
+                    <tbody id="an-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- ── ABOUT PAGE ────────────────────────  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="mode-content active" id="mode-about">
+
+        <!-- Hero -->
+        <div class="about-hero fade-in">
+            <div class="about-hero-title">Cascade</div>
+            <div class="about-hero-sub">
+                One API change. Multiple repos. Zero manual hunting.<br>
+                Cascade takes a single change description and propagates it across all connected
+                repositories using the <strong>Cline CLI</strong> as parallel worker agents. Each repo
+                gets its own branch with adapted code, passing tests, and a self-reviewed diff.
+            </div>
+            <div class="about-badges">
+                <span class="about-badge blue">Cline CLI as Infrastructure</span>
+                <span class="about-badge purple">DevWeek Hackathon 2026</span>
+                <span class="about-badge green">Multi-Repo Orchestration</span>
+                <span class="about-badge cyan">Real-Time Dashboard</span>
+                <span class="about-badge amber">GitHub PR Automation</span>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="about-grid">
+            <div class="about-card fade-in">
+                <div class="about-card-icon blue">&#x1F50D;</div>
+                <div class="about-card-title">Schema Drift Detection</div>
+                <div class="about-card-desc">
+                    Pattern-based scanning finds old field references across all repos. Detects when a
+                    source API has migrated but consumers still reference the old schema.
+                </div>
+            </div>
+            <div class="about-card fade-in">
+                <div class="about-card-icon green">&#x26A1;</div>
+                <div class="about-card-title">Parallel Propagation</div>
+                <div class="about-card-desc">
+                    Multiple Cline CLI agents run concurrently, each in its own branch. Adapts code,
+                    runs tests, auto-fixes failures, and self-reviews via <code>git diff | cline --json</code>.
+                </div>
+            </div>
+            <div class="about-card fade-in">
+                <div class="about-card-icon purple">&#x2442;</div>
+                <div class="about-card-title">GitHub Integration</div>
+                <div class="about-card-desc">
+                    Clone repos from GitHub URLs, detect drift across them, propagate changes, then push
+                    branches and create pull requests automatically using the <code>gh</code> CLI.
+                </div>
+            </div>
+            <div class="about-card fade-in">
+                <div class="about-card-icon cyan">&#x1F4CA;</div>
+                <div class="about-card-title">Live Dashboard &amp; Analytics</div>
+                <div class="about-card-desc">
+                    WebSocket-powered real-time monitoring with event tracking, per-repo progress cards,
+                    activity timeline, and session analytics across all operations.
+                </div>
+            </div>
+            <div class="about-card fade-in">
+                <div class="about-card-icon amber">&#x1F504;</div>
+                <div class="about-card-title">Auto-Detect Frequency</div>
+                <div class="about-card-desc">
+                    Configurable scan intervals continuously monitor repos for schema drift.
+                    Choose manual, every 10s, 30s, 1 min, or 5 min polling cycles.
+                </div>
+            </div>
+            <div class="about-card fade-in">
+                <div class="about-card-icon red">&#x1F6E0;</div>
+                <div class="about-card-title">Test &amp; Fix Loop</div>
+                <div class="about-card-desc">
+                    After adaptation, repo test commands run automatically. On failure, test output is piped
+                    back to Cline for auto-repair with configurable retry limits.
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow -->
+        <div class="about-section">
+            <div class="about-section-title"><span class="dot" style="background:var(--blue)"></span> How It Works</div>
+            <div class="about-flow">
+                <div class="about-flow-step">
+                    <div class="about-flow-num blue">1</div>
+                    <div class="about-flow-body">
+                        <div class="about-flow-title">Detect Drift</div>
+                        <div class="about-flow-desc">Cascade scans all repos for field-name patterns, comparing the source API schema against each consumer. Old references are flagged as drift.</div>
+                        <div class="about-flow-cmd">cline --json -c &lt;repo&gt; "List files affected by: &lt;change&gt;"</div>
+                    </div>
+                </div>
+                <div class="about-flow-step">
+                    <div class="about-flow-num green">2</div>
+                    <div class="about-flow-body">
+                        <div class="about-flow-title">Branch &amp; Adapt</div>
+                        <div class="about-flow-desc">For each consumer repo, an isolated git branch is created and a headless Cline agent adapts the code to the new schema.</div>
+                        <div class="about-flow-cmd">cline -y -c &lt;repo&gt; --timeout 600 "Apply this change: &lt;change&gt;"</div>
+                    </div>
+                </div>
+                <div class="about-flow-step">
+                    <div class="about-flow-num amber">3</div>
+                    <div class="about-flow-body">
+                        <div class="about-flow-title">Test &amp; Fix</div>
+                        <div class="about-flow-desc">Each repo's configured test command runs. If tests fail, the output is piped back to Cline for auto-repair, retrying up to the configured limit.</div>
+                        <div class="about-flow-cmd">&lt;test output&gt; | cline -y -c &lt;repo&gt; "Fix these failures"</div>
+                    </div>
+                </div>
+                <div class="about-flow-step">
+                    <div class="about-flow-num purple">4</div>
+                    <div class="about-flow-body">
+                        <div class="about-flow-title">Self-Review</div>
+                        <div class="about-flow-desc">The git diff is piped into a Cline agent in JSON mode for an automated code review, checking for missed references or broken logic.</div>
+                        <div class="about-flow-cmd">git diff | cline --json "Review these changes"</div>
+                    </div>
+                </div>
+                <div class="about-flow-step">
+                    <div class="about-flow-num cyan">5</div>
+                    <div class="about-flow-body">
+                        <div class="about-flow-title">Commit &amp; Push</div>
+                        <div class="about-flow-desc">Changes are staged and committed to the isolated branch. For GitHub repos, the branch is pushed to origin automatically.</div>
+                    </div>
+                </div>
+                <div class="about-flow-step">
+                    <div class="about-flow-num red">6</div>
+                    <div class="about-flow-body">
+                        <div class="about-flow-title">Create Pull Requests</div>
+                        <div class="about-flow-desc">Using the GitHub CLI, pull requests are created for each consumer repo with a detailed description including change summary, files changed, and test status.</div>
+                        <div class="about-flow-cmd">gh pr create --title "cascade: &lt;change&gt;" --body "..."</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="about-section">
+            <div class="about-section-title"><span class="dot" style="background:var(--purple)"></span> Tech Stack</div>
+            <div class="about-tech-grid">
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x1F916;</div>
+                    <div><div class="about-tech-name">Cline CLI</div><div class="about-tech-role">AI code agent orchestration</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x1F40D;</div>
+                    <div><div class="about-tech-name">Python / FastAPI</div><div class="about-tech-role">Backend API &amp; WebSocket server</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x1F310;</div>
+                    <div><div class="about-tech-name">HTML / CSS / JS</div><div class="about-tech-role">Single-page dashboard UI</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x1F433;</div>
+                    <div><div class="about-tech-name">Docker</div><div class="about-tech-role">Containerized deployment</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x1F500;</div>
+                    <div><div class="about-tech-name">Git</div><div class="about-tech-role">Branch, commit, diff ops</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x1F4E6;</div>
+                    <div><div class="about-tech-name">GitHub CLI (gh)</div><div class="about-tech-role">PR creation &amp; repo management</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x26A1;</div>
+                    <div><div class="about-tech-name">WebSockets</div><div class="about-tech-role">Real-time event streaming</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x1F4DD;</div>
+                    <div><div class="about-tech-name">YAML Config</div><div class="about-tech-role">Repo &amp; pipeline configuration</div></div>
+                </div>
+                <div class="about-tech">
+                    <div class="about-tech-icon">&#x2699;</div>
+                    <div><div class="about-tech-name">asyncio</div><div class="about-tech-role">Parallel agent execution</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- References -->
+        <div class="about-section">
+            <div class="about-section-title"><span class="dot" style="background:var(--cyan)"></span> References</div>
+            <div class="about-refs">
+                <a class="about-ref" href="https://cline.bot" target="_blank">
+                    <div class="about-ref-icon">&#x1F916;</div>
+                    <div class="about-ref-text">
+                        <div class="about-ref-title">Cline</div>
+                        <div class="about-ref-url">cline.bot</div>
+                    </div>
+                    <div class="about-ref-arrow">&rarr;</div>
+                </a>
+                <a class="about-ref" href="https://docs.cline.bot/cline-cli/overview" target="_blank">
+                    <div class="about-ref-icon">&#x1F4D6;</div>
+                    <div class="about-ref-text">
+                        <div class="about-ref-title">Cline CLI Documentation</div>
+                        <div class="about-ref-url">docs.cline.bot/cline-cli/overview</div>
+                    </div>
+                    <div class="about-ref-arrow">&rarr;</div>
+                </a>
+                <a class="about-ref" href="https://docs.cline.bot/cline-cli/cli-reference" target="_blank">
+                    <div class="about-ref-icon">&#x1F4CB;</div>
+                    <div class="about-ref-text">
+                        <div class="about-ref-title">Cline CLI Reference (Flags &amp; Options)</div>
+                        <div class="about-ref-url">docs.cline.bot/cline-cli/cli-reference</div>
+                    </div>
+                    <div class="about-ref-arrow">&rarr;</div>
+                </a>
+                <a class="about-ref" href="https://fastapi.tiangolo.com" target="_blank">
+                    <div class="about-ref-icon">&#x1F40D;</div>
+                    <div class="about-ref-text">
+                        <div class="about-ref-title">FastAPI</div>
+                        <div class="about-ref-url">fastapi.tiangolo.com</div>
+                    </div>
+                    <div class="about-ref-arrow">&rarr;</div>
+                </a>
+                <a class="about-ref" href="https://cli.github.com" target="_blank">
+                    <div class="about-ref-icon">&#x1F4E6;</div>
+                    <div class="about-ref-text">
+                        <div class="about-ref-title">GitHub CLI</div>
+                        <div class="about-ref-url">cli.github.com</div>
+                    </div>
+                    <div class="about-ref-arrow">&rarr;</div>
+                </a>
+                <a class="about-ref" href="https://docs.docker.com/compose/" target="_blank">
+                    <div class="about-ref-icon">&#x1F433;</div>
+                    <div class="about-ref-text">
+                        <div class="about-ref-title">Docker Compose</div>
+                        <div class="about-ref-url">docs.docker.com/compose</div>
+                    </div>
+                    <div class="about-ref-arrow">&rarr;</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align:center;padding:20px 0 10px;color:var(--text-4);font-size:12px;">
+            Built with &#x2764; using <a href="https://cline.bot" target="_blank" style="font-weight:600">Cline CLI</a> as infrastructure &middot; DevWeek Hackathon 2026
+        </div>
+    </div>
+
+    <!-- ── Event Log (shared) ────────────── -->
+    <div class="section">
+        <div class="section-head">
+            <div class="section-title">Event Log</div>
+        </div>
+        <div class="log-panel">
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Connection indicator ──────────── -->
+<div class="conn">
+    <div class="conn-dot" id="ws-dot"></div>
+    <span id="ws-lbl">Connecting...</span>
+</div>
+
+<script>
+var ws = null;
+var propData = {};
+var propStart = 0;
+var propTimer = null;
+var autoTimer = null;
+var countdownTimer = null;
+var nextScanAt = 0;
+var currentMode = "about";
+var ghRepos = [];
+var ghDetectionData = null;
+var ghPropData = {};
+var ghPropStart = 0;
+var ghPropTimer = null;
+
+function el(id) { return document.getElementById(id); }
+function esc(s) { var d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+
+/* ── Mode Switching ──────────────────────── */
+var currentSub = "demo";
+
+function switchMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll(".mode-tab").forEach(function(t) { t.classList.remove("active"); });
+    document.querySelectorAll(".mode-content").forEach(function(c) { c.classList.remove("active"); });
+    el("tab-" + mode).classList.add("active");
+    el("mode-" + mode).classList.add("active");
+    if (mode === "cascade" && currentSub === "demo") runDetection();
+    if (mode === "analytics") renderAnalytics();
+}
+
+function switchSub(sub) {
+    currentSub = sub;
+    document.querySelectorAll(".sub-nav-btn").forEach(function(b) { b.classList.remove("active"); });
+    document.querySelectorAll(".sub-pane").forEach(function(p) { p.classList.remove("active"); });
+    el("sub-" + sub).classList.add("active");
+    el("pane-" + sub).classList.add("active");
+    if (sub === "demo") runDetection();
+}
+
+/* ── Theme ───────────────────────────────── */
+function getTheme() { return localStorage.getItem("cascade-theme") || "dark"; }
+function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    localStorage.setItem("cascade-theme", t);
+    el("theme-label").textContent = t === "dark" ? "Dark" : "Light";
+}
+function toggleTheme() { applyTheme(getTheme() === "dark" ? "light" : "dark"); }
+applyTheme(getTheme());
+
+/* ── WebSocket ───────────────────────────── */
+function connectWS() {
+    var proto = location.protocol === "https:" ? "wss:" : "ws:";
+    ws = new WebSocket(proto + "//" + location.host + "/ws");
+    ws.onopen = function() { el("ws-dot").classList.add("on"); el("ws-lbl").textContent = "Connected"; };
+    ws.onclose = function() { el("ws-dot").classList.remove("on"); el("ws-lbl").textContent = "Reconnecting..."; setTimeout(connectWS, 3000); };
+    ws.onerror = function() { el("ws-dot").classList.remove("on"); };
+    ws.onmessage = function(e) { try { handleWSEvent(JSON.parse(e.data)); } catch(x) {} };
+}
+
+function handleWSEvent(msg) {
+    var t = msg.type || "";
+    var d = msg.data || {};
+    var now = new Date().toLocaleTimeString();
+    var cat = anCategorize(t);
+
+    if (t === "cascade.started") {
+        propData = {};
+        propStart = Date.now();
+        startPropTimer();
+        anCounters.props++;
+        anTrack(t, "Propagation started: " + (d.repos ? d.repos.length : 0) + " repos", cat);
+        if (d.repos) { for (var i = 0; i < d.repos.length; i++) propData[d.repos[i]] = { repo_name: d.repos[i], status: "waiting", language: "", branch: "", files_changed: [], test_passed: false, error: "", duration_seconds: 0, pr_url: "" }; }
+        if (currentSub === "demo") {
+            showPropSection();
+        } else {
+            el("gh-prop-section").classList.remove("hidden");
+        }
+        appendLog(now, "ev", "CASCADE STARTED");
+    } else if (t === "cascade.completed") {
+        stopPropTimer();
+        var dur = d.duration_seconds || 0;
+        anTotalPropDur += dur;
+        if (d.repos) {
+            for (var j = 0; j < d.repos.length; j++) {
+                propData[d.repos[j].repo_name] = d.repos[j];
+                anCounters.reposProcessed++;
+                var rn = d.repos[j].repo_name;
+                if (!anRepoStats[rn]) anRepoStats[rn] = { total: 0, ok: 0, fail: 0 };
+                anRepoStats[rn].total++;
+                if (d.repos[j].status === "done") { anCounters.reposSucceeded++; anRepoStats[rn].ok++; }
+                else if (d.repos[j].status === "failed") { anCounters.reposFailed++; anRepoStats[rn].fail++; anCounters.errors++; }
+            }
+        }
+        anTrack(t, (d.repos_success || 0) + " succeeded, " + (d.repos_failed || 0) + " failed (" + dur + "s)", cat);
+
+        if (currentSub === "demo") {
+            updatePropStats(d);
+        } else {
+            updateGHPropStats(d);
+            var anyDone = d.repos && d.repos.some(function(r) { return r.status === "done"; });
+            if (anyDone) {
+                el("gh-pr-panel").classList.remove("hidden");
+                renderGHPRGrid(d.repos.filter(function(r) { return r.status === "done"; }));
+            }
+        }
+        if (currentSub === "demo") renderPropGrid(); else renderGHPropGrid();
+        appendLog(now, "ok", "CASCADE COMPLETED: " + (d.repos_success || 0) + " succeeded, " + (d.repos_failed || 0) + " failed");
+        setBadge("done", "Complete");
+    } else if (t.indexOf("repo.") === 0) {
+        if (d.repo_name) propData[d.repo_name] = d;
+        var action = t.split(".")[1];
+        anTrack(t, (d.repo_name || "") + " " + action + (d.error ? " - " + d.error : ""), cat);
+        if (action === "failed") anCounters.errors++;
+        appendLog(now, action === "done" ? "ok" : action === "failed" ? "err" : "ev", "[" + (d.repo_name || "?") + "] " + action + (d.error ? " \u2014 " + d.error : ""));
+        if (currentSub === "demo") renderPropGrid(); else renderGHPropGrid();
+    } else if (t.indexOf("github.") === 0) {
+        var ghAction = t.split(".")[1];
+        if (ghAction === "pr_created" && d.success) anCounters.prsCreated++;
+        if (ghAction === "pr_created" && !d.success) { anCounters.prsFailed++; anCounters.errors++; }
+        anTrack(t, (d.repo || d.repo_name || "") + (d.pr_url ? " " + d.pr_url : ""), cat);
+        appendLog(now, ghAction === "pr_created" ? "ok" : "ev", "[GitHub] " + ghAction + ": " + (d.repo || d.repo_name || ""));
+    }
+}
+
+/* ── Detection (Demo) ────────────────────── */
+function runDetection() {
+    setBadge("scanning", "Scanning...");
+    anCounters.scans++;
+    anTrack("detect.scan", "Running drift detection", "detect");
+    fetch("/api/detect")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.status === "drift_detected") {
+                anCounters.driftDetected++;
+                anTrack("detect.drift", (d.affected_count || 0) + " repos drifted, " + (d.total_old_refs || 0) + " old refs", "detect");
+            } else {
+                anTrack("detect.sync", "All repos in sync", "detect");
+            }
+            renderDetection(d);
+        })
+        .catch(function(e) { anCounters.errors++; anTrack("detect.error", String(e), "detect"); appendLog(new Date().toLocaleTimeString(), "err", "Detection failed: " + e); });
+}
+
+function renderDetection(data) {
+    var repos = data.repos || [];
+    var status = data.status;
+    var driftCount = data.affected_count || 0;
+    var totalOld = data.total_old_refs || 0;
+
+    var syncCount = 0;
+    for (var i = 0; i < repos.length; i++) {
+        if (repos[i].status !== "out_of_sync") syncCount++;
+    }
+    el("s-repos").textContent = repos.length;
+    el("s-sync").textContent = syncCount;
+    el("s-drift").textContent = driftCount;
+    el("s-refs").textContent = totalOld;
+
+    if (status === "drift_detected") {
+        setBadge("drift", "Drift Detected");
+        var changeText = "The /users endpoint now returns full_name instead of separate first_name and last_name fields. The /posts endpoint returns author_name instead of author_first_name and author_last_name.";
+        el("banner-area").innerHTML =
+            '<div class="drift-banner fade-in">' +
+            '  <div class="drift-top">' +
+            '    <div class="drift-icon">!</div>' +
+            '    <div><div class="drift-title">Schema Drift Detected</div>' +
+            '    <div class="drift-desc">' + esc(data.change_summary) + '</div></div>' +
+            '  </div>' +
+            '  <div class="drift-actions">' +
+            '    <div class="drift-change">' + esc(changeText) + '</div>' +
+            '    <button class="btn btn-warn btn-lg" onclick="propagate()">Propagate Changes</button>' +
+            '  </div>' +
+            '</div>';
+        appendLog(new Date().toLocaleTimeString(), "warn", "DRIFT: " + driftCount + " repos out of sync (" + totalOld + " old refs)");
+    } else {
+        setBadge("sync", "All In Sync");
+        el("banner-area").innerHTML =
+            '<div class="sync-banner fade-in">' +
+            '  <div class="sync-left">' +
+            '    <div class="sync-icon">\u2713</div>' +
+            '    <div><div class="sync-title">All Repositories In Sync</div>' +
+            '    <div class="sync-desc">' + esc(data.change_summary) + '</div></div>' +
+            '  </div>' +
+            '  <button class="btn btn-primary" onclick="simulateChange()">Simulate Backend Change</button>' +
+            '</div>';
+    }
+
+    var html = "";
+    for (var j = 0; j < repos.length; j++) {
+        html += buildRepoCard(repos[j]);
+    }
+    el("detect-grid").innerHTML = html;
+}
+
+function buildRepoCard(r) {
+    var cardCls = "repo-card";
+    if (r.role === "source") cardCls += " c-source";
+    else if (r.status === "out_of_sync") cardCls += " c-drift";
+    else if (r.status === "current" || r.status === "synced") cardCls += " c-current";
+    else if (r.status === "updated") cardCls += " c-updated";
+
+    var badgeLabel = r.status.replace(/_/g, " ").toUpperCase();
+    if (r.role === "source") badgeLabel = "SOURCE \u2014 " + badgeLabel;
+
+    var h = '<div class="' + cardCls + ' fade-in">';
+    h += '<div class="repo-top"><div class="repo-name">' + esc(r.name) + '</div><div class="lang-tag">' + esc(r.language) + '</div></div>';
+    h += '<div class="rb rb-' + r.status + '">' + badgeLabel + '</div>';
+    h += '<div class="repo-meta"><span>' + (r.files_scanned || 0) + ' files scanned</span>';
+    if (r.old_field_count > 0) h += '<span style="color:var(--amber)">' + r.old_field_count + ' old refs</span>';
+    if (r.new_field_count > 0) h += '<span style="color:var(--green)">' + r.new_field_count + ' new refs</span>';
+    h += '</div>';
+
+    if (r.status === "out_of_sync" && r.old_refs && r.old_refs.length > 0) {
+        h += '<div class="ref-list">';
+        var n = Math.min(r.old_refs.length, 5);
+        for (var k = 0; k < n; k++) {
+            var ref = r.old_refs[k];
+            h += '<div><span class="ref-file">' + esc(ref.file) + ':' + ref.line + '</span> <span class="ref-field">' + esc(ref.field) + '</span></div>';
+        }
+        if (r.old_refs.length > 5) h += '<div style="color:var(--text-4)">...and ' + (r.old_refs.length - 5) + ' more</div>';
+        h += '</div>';
+    }
+    if (r.new_refs && r.new_refs.length > 0 && r.status === "updated") {
+        h += '<div class="ref-list">';
+        var m = Math.min(r.new_refs.length, 3);
+        for (var p = 0; p < m; p++) {
+            var nr = r.new_refs[p];
+            h += '<div><span class="ref-file">' + esc(nr.file) + ':' + nr.line + '</span> <span class="ref-field new">' + esc(nr.field) + '</span></div>';
+        }
+        h += '</div>';
+    }
+    h += '</div>';
+    return h;
+}
+
+/* ── Simulate (Demo) ────────────────────── */
+function simulateChange() {
+    anCounters.simulations++;
+    anTrack("ui.simulate", "Simulating backend schema change", "ui");
+    appendLog(new Date().toLocaleTimeString(), "ev", "Simulating backend API change...");
+    setBadge("scanning", "Applying...");
+    fetch("/api/simulate", { method: "POST" })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.error) { appendLog(new Date().toLocaleTimeString(), "err", "Simulate failed: " + d.error); return; }
+            appendLog(new Date().toLocaleTimeString(), "ok", "Backend updated: " + d.message);
+            if (d.detection) renderDetection(d.detection);
+        })
+        .catch(function(e) { appendLog(new Date().toLocaleTimeString(), "err", "Simulate error: " + e); });
+}
+
+/* ── Propagate (Demo) ────────────────────── */
+function propagate() {
+    var change = "The /users endpoint now returns full_name (a single string) instead of separate first_name and last_name fields. The /posts endpoint returns author_name instead of author_first_name and author_last_name. Update all models, API calls, display logic, and tests accordingly.";
+    anTrack("ui.propagate", "Triggering demo propagation", "ui");
+    setBadge("running", "Propagating...");
+    appendLog(new Date().toLocaleTimeString(), "ev", "Starting propagation...");
+    fetch("/api/run?change=" + encodeURIComponent(change), { method: "POST" })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { if (d.error) { appendLog(new Date().toLocaleTimeString(), "err", "Run failed: " + d.error); setBadge("drift", "Error"); } })
+        .catch(function(e) { appendLog(new Date().toLocaleTimeString(), "err", "Run error: " + e); });
+}
+
+function showPropSection() { el("prop-section").classList.remove("hidden"); el("detect-section").classList.add("hidden"); }
+
+function renderPropGrid() {
+    var keys = Object.keys(propData);
+    if (!keys.length) return;
+    var html = "";
+    for (var i = 0; i < keys.length; i++) {
+        var r = propData[keys[i]];
+        html += buildPropCard(r);
+    }
+    el("prop-grid").innerHTML = html;
+}
+
+function buildPropCard(r) {
+    var cls = "repo-card";
+    if (r.status === "done") cls += " c-done";
+    else if (r.status === "failed") cls += " c-failed";
+    else if (r.status !== "waiting" && r.status !== "skipped") cls += " c-active";
+
+    var h = '<div class="' + cls + '">';
+    h += '<div class="repo-top"><div class="repo-name">' + esc(r.repo_name) + '</div>';
+    if (r.language) h += '<div class="lang-tag">' + esc(r.language) + '</div>';
+    h += '</div>';
+    h += '<div class="rb rb-' + r.status + '">' + r.status.toUpperCase() + '</div>';
+    h += '<div class="repo-meta">';
+    if (r.branch) h += '<span>Branch: ' + esc(r.branch) + '</span>';
+    if (r.test_passed) h += '<span style="color:var(--green)">Tests: pass</span>';
+    if (r.duration_seconds) h += '<span>' + r.duration_seconds + 's</span>';
+    h += '</div>';
+    if (r.files_changed && r.files_changed.length) {
+        h += '<div class="repo-files">' + r.files_changed.length + ' files: ' + r.files_changed.slice(0, 3).join(", ");
+        if (r.files_changed.length > 3) h += "...";
+        h += '</div>';
+    }
+    if (r.pr_url) h += '<div style="margin-top:6px"><a href="' + esc(r.pr_url) + '" target="_blank" style="font-size:12px;color:var(--green);font-weight:600">View PR &rarr;</a></div>';
+    if (r.error) h += '<div class="repo-error">' + esc(r.error) + '</div>';
+    h += '</div>';
+    return h;
+}
+
+function updatePropStats(d) {
+    el("p-total").textContent = d.repos_total || "-";
+    el("p-ok").textContent = d.repos_success || 0;
+    el("p-fail").textContent = d.repos_failed || 0;
+    el("p-dur").textContent = (d.duration_seconds || 0) + "s";
+}
+
+function startPropTimer() { stopPropTimer(); propTimer = setInterval(function() { el("prop-timer").textContent = ((Date.now() - propStart) / 1000).toFixed(0) + "s"; }, 500); }
+function stopPropTimer() { if (propTimer) { clearInterval(propTimer); propTimer = null; } }
+
+/* ── Auto-Detect Frequency ───────────────── */
+function setAutoDetect(seconds) {
+    var s = parseInt(seconds, 10);
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    el("freq-counter").textContent = "";
+    if (s > 0) {
+        nextScanAt = Date.now() + s * 1000;
+        autoTimer = setInterval(function() {
+            runDetection();
+            nextScanAt = Date.now() + s * 1000;
+        }, s * 1000);
+        countdownTimer = setInterval(function() {
+            var remaining = Math.max(0, Math.ceil((nextScanAt - Date.now()) / 1000));
+            el("freq-counter").textContent = "next in " + remaining + "s";
+        }, 1000);
+    }
+}
+
+/* ══════════════════════════════════════════════ */
+/* ══ GITHUB INTEGRATION ═══════════════════════ */
+/* ══════════════════════════════════════════════ */
+
+function toggleGHPanel() {
+    var body = el("gh-body");
+    var chevron = el("gh-chevron");
+    var header = el("gh-body").previousElementSibling;
+    body.classList.toggle("open");
+    chevron.classList.toggle("open");
+    header.classList.toggle("open");
+}
+
+function ghImport() {
+    var urls = el("gh-urls").value.trim().split("\n").map(function(u) { return u.trim(); }).filter(Boolean);
+    if (!urls.length) {
+        el("gh-status").innerHTML = '<span class="err">Enter at least one repo URL</span>';
+        return;
+    }
+
+    var sourceRepo = el("gh-source-select").value;
+    el("gh-import-btn").disabled = true;
+    el("gh-status").innerHTML = '<span class="ev">Cloning ' + urls.length + ' repos...</span>';
+    setBadge("scanning", "Cloning...");
+    appendLog(new Date().toLocaleTimeString(), "ev", "Importing " + urls.length + " GitHub repos...");
+
+    fetch("/api/github/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ repos: urls, source_repo: sourceRepo }),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        el("gh-import-btn").disabled = false;
+        if (d.error) {
+            el("gh-status").innerHTML = '<span class="err">' + esc(d.error) + '</span>';
+            setBadge("drift", "Error");
+            return;
+        }
+
+        ghRepos = d.repos || [];
+        anCounters.ghImports++;
+        anTrack("github.imported", ghRepos.length + " repos cloned from GitHub", "github");
+        el("gh-status").innerHTML = '<span class="ok">' + ghRepos.length + ' repos imported</span>';
+        el("gh-detect-btn").disabled = false;
+        appendLog(new Date().toLocaleTimeString(), "ok", "Imported " + ghRepos.length + " repos from GitHub");
+
+        renderGHClonedList();
+        updateGHSourceSelect();
+
+        if (d.detection) {
+            ghDetectionData = d.detection;
+            renderGHDetection(d.detection);
+        }
+        setBadge("sync", "Imported");
+    })
+    .catch(function(e) {
+        el("gh-import-btn").disabled = false;
+        el("gh-status").innerHTML = '<span class="err">Error: ' + e + '</span>';
+    });
+}
+
+function renderGHClonedList() {
+    var html = "";
+    for (var i = 0; i < ghRepos.length; i++) {
+        var r = ghRepos[i];
+        var roleCls = r.role === "source" ? "source" : "consumer";
+        html += '<div class="gh-cloned-item fade-in">';
+        html += '<span class="gh-cloned-name">' + esc(r.name) + '</span>';
+        html += '<span class="lang-tag">' + esc(r.language || "unknown") + '</span>';
+        html += '<span class="gh-cloned-role ' + roleCls + '" onclick="toggleGHRole(\'' + esc(r.name) + '\')">' + r.role.toUpperCase() + '</span>';
+        if (r.status === "failed") html += '<span style="color:var(--red);font-size:11px">' + esc(r.error) + '</span>';
+        html += '</div>';
+    }
+    el("gh-cloned-list").innerHTML = html;
+}
+
+function updateGHSourceSelect() {
+    var select = el("gh-source-select");
+    select.innerHTML = '<option value="">-- Auto-detect --</option>';
+    for (var i = 0; i < ghRepos.length; i++) {
+        var r = ghRepos[i];
+        if (r.status !== "failed") {
+            var opt = document.createElement("option");
+            opt.value = r.name;
+            opt.textContent = r.name + (r.role === "source" ? " (source)" : "");
+            if (r.role === "source") opt.selected = true;
+            select.appendChild(opt);
+        }
+    }
+}
+
+function toggleGHRole(repoName) {
+    for (var i = 0; i < ghRepos.length; i++) {
+        if (ghRepos[i].name === repoName) {
+            var newRole = ghRepos[i].role === "source" ? "consumer" : "source";
+            ghRepos[i].role = newRole;
+            fetch("/api/github/update-role?repo_name=" + encodeURIComponent(repoName) + "&role=" + newRole, { method: "POST" });
+            break;
+        }
+    }
+    renderGHClonedList();
+    updateGHSourceSelect();
+}
+
+function ghDetect() {
+    setBadge("scanning", "Scanning...");
+    appendLog(new Date().toLocaleTimeString(), "ev", "Scanning GitHub repos for drift...");
+    fetch("/api/github/detect", { method: "POST" })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            ghDetectionData = d;
+            renderGHDetection(d);
+        })
+        .catch(function(e) { appendLog(new Date().toLocaleTimeString(), "err", "GitHub detect failed: " + e); });
+}
+
+function renderGHDetection(data) {
+    var repos = data.repos || [];
+    var status = data.status;
+    var driftCount = data.affected_count || 0;
+    var totalOld = data.total_old_refs || 0;
+
+    el("gh-stats-row").classList.remove("hidden");
+    el("gh-detect-section").classList.remove("hidden");
+
+    var syncCount = 0;
+    for (var i = 0; i < repos.length; i++) {
+        if (repos[i].status !== "out_of_sync") syncCount++;
+    }
+    el("gh-s-repos").textContent = repos.length;
+    el("gh-s-sync").textContent = syncCount;
+    el("gh-s-drift").textContent = driftCount;
+    el("gh-s-refs").textContent = totalOld;
+
+    if (status === "drift_detected") {
+        setBadge("drift", "Drift Detected");
+        el("gh-banner-area").innerHTML =
+            '<div class="drift-banner fade-in">' +
+            '  <div class="drift-top">' +
+            '    <div class="drift-icon">!</div>' +
+            '    <div><div class="drift-title">Schema Drift Detected</div>' +
+            '    <div class="drift-desc">' + esc(data.change_summary) + '</div></div>' +
+            '  </div>' +
+            '  <div class="drift-actions">' +
+            '    <div class="drift-change">' + esc(data.change_summary) + '</div>' +
+            '    <button class="btn btn-warn btn-lg" onclick="ghPropagate()">Propagate Changes</button>' +
+            '    <button class="btn btn-ghost" onclick="ghDetect()">Re-scan</button>' +
+            '  </div>' +
+            '</div>';
+        appendLog(new Date().toLocaleTimeString(), "warn", "GitHub DRIFT: " + driftCount + " repos out of sync");
+    } else {
+        setBadge("sync", "All In Sync");
+        el("gh-banner-area").innerHTML =
+            '<div class="sync-banner fade-in">' +
+            '  <div class="sync-left">' +
+            '    <div class="sync-icon">\u2713</div>' +
+            '    <div><div class="sync-title">All Repositories In Sync</div>' +
+            '    <div class="sync-desc">' + esc(data.change_summary || "No schema drift detected across your repos.") + '</div></div>' +
+            '  </div>' +
+            '</div>';
+    }
+
+    var html = "";
+    for (var j = 0; j < repos.length; j++) {
+        html += buildRepoCard(repos[j]);
+    }
+    el("gh-detect-grid").innerHTML = html;
+}
+
+function ghPropagate() {
+    var change = prompt("Describe the change to propagate:", ghDetectionData ? (ghDetectionData.change_summary || "") : "");
+    if (!change) return;
+
+    setBadge("running", "Propagating...");
+    appendLog(new Date().toLocaleTimeString(), "ev", "Starting GitHub propagation...");
+
+    fetch("/api/github/run?change=" + encodeURIComponent(change), { method: "POST" })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.error) {
+                appendLog(new Date().toLocaleTimeString(), "err", "GitHub run failed: " + d.error);
+                setBadge("drift", "Error");
+            }
+        })
+        .catch(function(e) { appendLog(new Date().toLocaleTimeString(), "err", "GitHub run error: " + e); });
+}
+
+function renderGHPropGrid() {
+    var keys = Object.keys(propData);
+    if (!keys.length) return;
+    var html = "";
+    for (var i = 0; i < keys.length; i++) {
+        html += buildPropCard(propData[keys[i]]);
+    }
+    el("gh-prop-grid").innerHTML = html;
+}
+
+function updateGHPropStats(d) {
+    el("gh-p-total").textContent = d.repos_total || "-";
+    el("gh-p-ok").textContent = d.repos_success || 0;
+    el("gh-p-fail").textContent = d.repos_failed || 0;
+    el("gh-p-dur").textContent = (d.duration_seconds || 0) + "s";
+}
+
+function renderGHPRGrid(doneRepos) {
+    if (!doneRepos || !doneRepos.length) return;
+    var html = "";
+    for (var i = 0; i < doneRepos.length; i++) {
+        var r = doneRepos[i];
+        var sourceInfo = ghRepos.find(function(g) { return g.name === r.repo_name; });
+        if (sourceInfo && sourceInfo.role === "source") continue;
+        html += '<div class="pr-card pending">';
+        html += '<div class="pr-icon">&#x1F4CB;</div>';
+        html += '<div class="pr-info">';
+        html += '<div class="pr-repo">' + esc(r.repo_name) + '</div>';
+        html += '<div class="pr-branch">' + esc(r.branch || "cascade/...") + '</div>';
+        html += '</div>';
+        html += '</div>';
+    }
+    el("gh-pr-grid").innerHTML = html;
+}
+
+function ghCreatePRs() {
+    el("gh-create-prs-btn").disabled = true;
+    el("gh-create-prs-btn").textContent = "Creating PRs...";
+    setBadge("running", "Creating PRs...");
+    appendLog(new Date().toLocaleTimeString(), "ev", "Pushing branches and creating PRs...");
+
+    fetch("/api/github/prs", { method: "POST" })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            el("gh-create-prs-btn").disabled = false;
+            el("gh-create-prs-btn").textContent = "Create All PRs";
+            if (d.error) {
+                appendLog(new Date().toLocaleTimeString(), "err", "PR creation failed: " + d.error);
+                setBadge("drift", "PR Error");
+                return;
+            }
+
+            var prs = d.prs || [];
+            var html = "";
+            for (var i = 0; i < prs.length; i++) {
+                var pr = prs[i];
+                var cls = pr.success ? "success" : "failed";
+                html += '<div class="pr-card ' + cls + '">';
+                html += '<div class="pr-icon">' + (pr.success ? "&#x2705;" : "&#x274C;") + '</div>';
+                html += '<div class="pr-info">';
+                html += '<div class="pr-repo">' + esc(pr.repo_name) + '</div>';
+                html += '<div class="pr-branch">' + esc(pr.branch) + '</div>';
+                if (pr.pr_url) html += '<div class="pr-link"><a href="' + esc(pr.pr_url) + '" target="_blank">View Pull Request &rarr;</a></div>';
+                if (pr.error) html += '<div class="pr-err">' + esc(pr.error) + '</div>';
+                html += '</div></div>';
+
+                if (pr.success) {
+                    appendLog(new Date().toLocaleTimeString(), "ok", "PR created: " + pr.repo_name + " \u2192 " + pr.pr_url);
+                } else {
+                    appendLog(new Date().toLocaleTimeString(), "err", "PR failed: " + pr.repo_name + " \u2014 " + pr.error);
+                }
+            }
+            el("gh-pr-grid").innerHTML = html;
+            var successCount = prs.filter(function(p) { return p.success; }).length;
+            setBadge("done", successCount + " PRs Created");
+        })
+        .catch(function(e) {
+            el("gh-create-prs-btn").disabled = false;
+            el("gh-create-prs-btn").textContent = "Create All PRs";
+            appendLog(new Date().toLocaleTimeString(), "err", "PR error: " + e);
+        });
+}
+
+/* ══════════════════════════════════════════════ */
+/* ══ ANALYTICS ════════════════════════════════ */
+/* ══════════════════════════════════════════════ */
+
+var anSessionStart = Date.now();
+var anEvents = [];
+var anCounters = { total: 0, scans: 0, driftDetected: 0, props: 0, reposProcessed: 0, reposSucceeded: 0, reposFailed: 0, prsCreated: 0, prsFailed: 0, ghImports: 0, simulations: 0, resets: 0, errors: 0 };
+var anTotalPropDur = 0;
+var anFilter_active = "all";
+var anRepoStats = {};
+var anSessionTimer = null;
+
+function anTrack(type, detail, category) {
+    var ev = { ts: Date.now(), time: new Date().toLocaleTimeString(), type: type, detail: detail || "", cat: category || "ui" };
+    anEvents.push(ev);
+    anCounters.total++;
+    if (currentMode === "analytics") renderAnalytics();
+}
+
+function anCategorize(wsType) {
+    if (wsType.indexOf("cascade.") === 0) return "cascade";
+    if (wsType.indexOf("repo.") === 0) return "repo";
+    if (wsType.indexOf("github.") === 0) return "github";
+    return "ui";
+}
+
+function renderAnalytics() {
+    var sessionMin = Math.floor((Date.now() - anSessionStart) / 60000);
+    var sessionSec = Math.floor(((Date.now() - anSessionStart) % 60000) / 1000);
+    el("an-total").textContent = anCounters.total;
+    el("an-session-time").textContent = "Session: " + sessionMin + "m " + sessionSec + "s";
+
+    el("an-scans").textContent = anCounters.scans;
+    el("an-drift-rate").textContent = anCounters.scans > 0
+        ? "Drift rate: " + Math.round(anCounters.driftDetected / anCounters.scans * 100) + "%"
+        : "Drift rate: --";
+
+    el("an-props").textContent = anCounters.props;
+    el("an-avg-dur").textContent = anCounters.props > 0
+        ? "Avg duration: " + Math.round(anTotalPropDur / anCounters.props) + "s"
+        : "Avg duration: --";
+
+    el("an-repos").textContent = anCounters.reposProcessed;
+    el("an-success-rate").textContent = anCounters.reposProcessed > 0
+        ? "Success rate: " + Math.round(anCounters.reposSucceeded / anCounters.reposProcessed * 100) + "%"
+        : "Success rate: --";
+
+    el("an-prs").textContent = anCounters.prsCreated;
+    var totalPRAttempts = anCounters.prsCreated + anCounters.prsFailed;
+    el("an-pr-rate").textContent = totalPRAttempts > 0
+        ? "Success rate: " + Math.round(anCounters.prsCreated / totalPRAttempts * 100) + "%"
+        : "Success rate: --";
+
+    el("an-errors").textContent = anCounters.errors;
+    el("an-error-rate").textContent = anCounters.total > 0
+        ? "Error rate: " + Math.round(anCounters.errors / anCounters.total * 100) + "%"
+        : "Error rate: --";
+
+    renderTimeline();
+    renderBreakdown();
+    renderRepoPerf();
+    renderEventTable();
+}
+
+function renderTimeline() {
+    if (!anEvents.length) {
+        el("an-tl-chart").innerHTML = '<div class="an-empty" style="width:100%;height:80px;display:flex;align-items:center;justify-content:center">Waiting for events...</div>';
+        el("an-tl-labels").innerHTML = '';
+        el("an-tl-range").textContent = '--';
+        return;
+    }
+    var now = Date.now();
+    var bucketSize = 60000;
+    var numBuckets = 30;
+    var startTs = now - numBuckets * bucketSize;
+    var buckets = [];
+    for (var b = 0; b < numBuckets; b++) buckets.push(0);
+
+    for (var i = 0; i < anEvents.length; i++) {
+        var idx = Math.floor((anEvents[i].ts - startTs) / bucketSize);
+        if (idx >= 0 && idx < numBuckets) buckets[idx]++;
+    }
+
+    var maxVal = Math.max.apply(null, buckets) || 1;
+    var html = "";
+    for (var j = 0; j < numBuckets; j++) {
+        var pct = Math.round(buckets[j] / maxVal * 100);
+        var h = Math.max(pct, buckets[j] > 0 ? 8 : 2);
+        var tipTime = new Date(startTs + j * bucketSize).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        html += '<div class="an-tl-bar" style="height:' + h + '%;opacity:' + (buckets[j] > 0 ? (.35 + .65 * pct / 100) : .12) + '" data-tip="' + tipTime + ' \u2014 ' + buckets[j] + ' events"></div>';
+    }
+    el("an-tl-chart").innerHTML = html;
+
+    var startLabel = new Date(startTs).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    var endLabel = new Date(now).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    el("an-tl-labels").innerHTML = '<span>' + startLabel + '</span><span>Now \u2014 ' + endLabel + '</span>';
+    el("an-tl-range").textContent = "Last " + numBuckets + " min";
+}
+
+function renderBreakdown() {
+    var cats = {};
+    for (var i = 0; i < anEvents.length; i++) {
+        var c = anEvents[i].cat;
+        cats[c] = (cats[c] || 0) + 1;
+    }
+
+    var colorMap = { cascade: "blue", repo: "cyan", detect: "amber", github: "purple", ui: "green" };
+    var labelMap = { cascade: "Cascade Runs", repo: "Repo Pipeline", detect: "Drift Detection", github: "GitHub Ops", ui: "UI Actions" };
+    var maxCount = 1;
+    var keys = Object.keys(cats);
+    for (var k = 0; k < keys.length; k++) {
+        if (cats[keys[k]] > maxCount) maxCount = cats[keys[k]];
+    }
+
+    var order = ["cascade", "repo", "detect", "github", "ui"];
+    var total = anEvents.length || 1;
+    var html = "";
+    for (var o = 0; o < order.length; o++) {
+        var cat = order[o];
+        var cnt = cats[cat] || 0;
+        var pct = Math.round(cnt / maxCount * 100);
+        var share = Math.round(cnt / total * 100);
+        html += '<div class="an-bar-group">';
+        html += '<div class="an-bar-label"><span class="an-bar-name">' + (labelMap[cat] || cat) + '</span><span class="an-bar-count">' + cnt + ' <span style="color:var(--text-4);font-weight:400;font-size:11px">(' + share + '%)</span></span></div>';
+        html += '<div class="an-bar-track"><div class="an-bar-fill ' + (colorMap[cat] || "blue") + '" style="width:' + pct + '%"></div></div>';
+        html += '</div>';
+    }
+    if (!keys.length) html = '<div class="an-empty">No events recorded yet</div>';
+    el("an-breakdown").innerHTML = html;
+}
+
+function renderRepoPerf() {
+    var repos = Object.keys(anRepoStats);
+    if (!repos.length) {
+        el("an-repo-perf").innerHTML = '<div class="an-empty">Run a propagation to see repo metrics</div>';
+        return;
+    }
+
+    var maxRuns = 1;
+    for (var i = 0; i < repos.length; i++) {
+        if (anRepoStats[repos[i]].total > maxRuns) maxRuns = anRepoStats[repos[i]].total;
+    }
+
+    var html = "";
+    for (var j = 0; j < repos.length; j++) {
+        var name = repos[j];
+        var stat = anRepoStats[name];
+        var succPct = stat.total > 0 ? Math.round(stat.ok / stat.total * 100) : 0;
+        var okW = Math.round(stat.ok / maxRuns * 100);
+        var failW = Math.round(stat.fail / maxRuns * 100);
+        var barColor = stat.fail > 0 ? (succPct >= 50 ? "amber" : "red") : "green";
+        html += '<div class="an-bar-group">';
+        html += '<div class="an-bar-label"><span class="an-bar-name">' + esc(name) + '</span>';
+        html += '<span class="an-bar-count">';
+        html += '<span style="color:var(--green)">' + stat.ok + '</span>';
+        if (stat.fail > 0) html += ' / <span style="color:var(--red)">' + stat.fail + '</span>';
+        html += ' <span style="color:var(--text-4);font-weight:400;font-size:11px">(' + succPct + '% pass)</span>';
+        html += '</span></div>';
+        html += '<div class="an-bar-track">';
+        html += '<div class="an-bar-fill ' + barColor + '" style="width:' + okW + '%"></div>';
+        html += '</div>';
+        html += '</div>';
+    }
+    el("an-repo-perf").innerHTML = html;
+}
+
+function renderEventTable() {
+    var filtered = anFilter_active === "all"
+        ? anEvents
+        : anEvents.filter(function(e) { return e.cat === anFilter_active; });
+
+    var recent = filtered.slice(-100).reverse();
+
+    if (!recent.length) {
+        el("an-tbody").innerHTML = '<tr><td colspan="3" class="an-empty">No events match filter</td></tr>';
+        return;
+    }
+
+    var html = "";
+    for (var i = 0; i < recent.length; i++) {
+        var ev = recent[i];
+        html += '<tr>';
+        html += '<td class="ts-col">' + ev.time + '</td>';
+        html += '<td class="type-col cat-' + ev.cat + '"><span class="type-badge">' + esc(ev.type) + '</span></td>';
+        html += '<td class="detail-col" title="' + esc(ev.detail) + '">' + esc(ev.detail) + '</td>';
+        html += '</tr>';
+    }
+    el("an-tbody").innerHTML = html;
+}
+
+function anFilter(cat, btn) {
+    anFilter_active = cat;
+    document.querySelectorAll(".an-filter-btn").forEach(function(b) { b.classList.remove("active"); });
+    btn.classList.add("active");
+    renderEventTable();
+}
+
+function startSessionTimer() {
+    anSessionTimer = setInterval(function() {
+        if (currentMode === "analytics") renderAnalytics();
+    }, 5000);
+}
+
+/* ── Badge ───────────────────────────────── */
+function setBadge(type, text) {
+    var b = el("global-badge");
+    b.className = "header-badge hb-" + type;
+    var dot = (type === "scanning" || type === "running") ? '<div class="badge-dot pulse"></div>' : '<div class="badge-dot"></div>';
+    b.innerHTML = dot + "<span>" + esc(text) + "</span>";
+}
+
+/* ── Log ─────────────────────────────────── */
+function appendLog(time, cls, text) {
+    var l = el("log");
+    l.innerHTML += '<span class="ts">[' + time + ']</span> <span class="' + cls + '">' + esc(text) + '</span>\n';
+    l.scrollTop = l.scrollHeight;
+}
+
+/* ── Init ────────────────────────────────── */
+connectWS();
+anTrack("ui.loaded", "Dashboard session started", "ui");
+appendLog(new Date().toLocaleTimeString(), "ev", "Dashboard loaded");
+startSessionTimer();
+setAutoDetect(el("freq-select").value);
+</script>
+</body>
+</html>
