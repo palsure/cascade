@@ -989,15 +989,16 @@
             <div class="about-hero-title">Cascade</div>
             <div class="about-hero-sub">
                 One API change. Multiple repos. Zero manual hunting.<br>
-                Cascade takes a single change description and propagates it across all connected
-                repositories using the <strong>Cline CLI</strong> as parallel worker agents. Each repo
-                gets its own branch with adapted code, passing tests, and a self-reviewed diff.
+                Cascade uses the <strong>Cline CLI</strong> as a programmable building block &mdash; not a coding
+                assistant, but infrastructure. It takes a single change description and propagates it across all
+                connected repositories using parallel Cline agents. Each repo gets its own branch with adapted code,
+                passing tests, a self-reviewed diff, and an auto-created PR.
             </div>
             <div class="about-badges">
                 <span class="about-badge blue">Cline CLI as Infrastructure</span>
                 <span class="about-badge purple">DevWeek Hackathon 2026</span>
                 <span class="about-badge green">Multi-Repo Orchestration</span>
-                <span class="about-badge cyan">Real-Time Dashboard</span>
+                <span class="about-badge cyan">Real-Time Dashboard &amp; Analytics</span>
                 <span class="about-badge amber">GitHub PR Automation</span>
             </div>
         </div>
@@ -1009,23 +1010,26 @@
                 <div class="about-card-title">Schema Drift Detection</div>
                 <div class="about-card-desc">
                     Pattern-based scanning finds old field references across all repos. Detects when a
-                    source API has migrated but consumers still reference the old schema.
+                    source API has migrated but consumers still reference the old schema. Works with
+                    both local demo repos and cloned GitHub repositories.
                 </div>
             </div>
             <div class="about-card fade-in">
                 <div class="about-card-icon green">&#x26A1;</div>
-                <div class="about-card-title">Parallel Propagation</div>
+                <div class="about-card-title">Parallel Propagation via Cline</div>
                 <div class="about-card-desc">
-                    Multiple Cline CLI agents run concurrently, each in its own branch. Adapts code,
-                    runs tests, auto-fixes failures, and self-reviews via <code>git diff | cline --json</code>.
+                    Multiple Cline CLI agents run concurrently, each in its own branch. Cline adapts code
+                    (<code>cline -y</code>), runs tests, auto-fixes failures, and self-reviews via
+                    <code>git diff | cline --json</code>. Authenticated via Cline API key.
                 </div>
             </div>
             <div class="about-card fade-in">
                 <div class="about-card-icon purple">&#x2442;</div>
                 <div class="about-card-title">GitHub Integration</div>
                 <div class="about-card-desc">
-                    Clone repos from GitHub URLs, detect drift across them, propagate changes, then push
-                    branches and create pull requests automatically using the <code>gh</code> CLI.
+                    Clone repos from GitHub URLs, auto-detect language and test commands,
+                    detect drift, propagate changes, then push branches and create pull requests
+                    automatically using the <code>gh</code> CLI.
                 </div>
             </div>
             <div class="about-card fade-in">
@@ -1033,15 +1037,18 @@
                 <div class="about-card-title">Live Dashboard &amp; Analytics</div>
                 <div class="about-card-desc">
                     WebSocket-powered real-time monitoring with event tracking, per-repo progress cards,
-                    activity timeline, and session analytics across all operations.
+                    activity timeline, event breakdown, and session analytics. Includes
+                    light/dark theme and configurable auto-detect frequency.
                 </div>
             </div>
             <div class="about-card fade-in">
-                <div class="about-card-icon amber">&#x1F504;</div>
-                <div class="about-card-title">Auto-Detect Frequency</div>
+                <div class="about-card-icon amber">&#x1F511;</div>
+                <div class="about-card-title">Cline API Authentication</div>
                 <div class="about-card-desc">
-                    Configurable scan intervals continuously monitor repos for schema drift.
-                    Choose manual, every 10s, 30s, 1 min, or 5 min polling cycles.
+                    Authenticates with Cline via API key from
+                    <a href="https://app.cline.bot/dashboard/account?tab=api-keys" target="_blank">app.cline.bot</a>.
+                    Docker auto-authenticates on startup using <code>cline auth</code> and persists credentials
+                    across container restarts.
                 </div>
             </div>
             <div class="about-card fade-in">
@@ -1049,7 +1056,8 @@
                 <div class="about-card-title">Test &amp; Fix Loop</div>
                 <div class="about-card-desc">
                     After adaptation, repo test commands run automatically. On failure, test output is piped
-                    back to Cline for auto-repair with configurable retry limits.
+                    back to Cline for auto-repair with configurable retry limits. Ensures propagated
+                    changes don't break downstream consumers.
                 </div>
             </div>
         </div>
@@ -1062,8 +1070,8 @@
                     <div class="about-flow-num blue">1</div>
                     <div class="about-flow-body">
                         <div class="about-flow-title">Detect Drift</div>
-                        <div class="about-flow-desc">Cascade scans all repos for field-name patterns, comparing the source API schema against each consumer. Old references are flagged as drift.</div>
-                        <div class="about-flow-cmd">cline --json -c &lt;repo&gt; "List files affected by: &lt;change&gt;"</div>
+                        <div class="about-flow-desc">Cascade scans all repos for field-name patterns, comparing the source API schema against each consumer. Old references are flagged as drift. Works on both local demo repos and cloned GitHub repos.</div>
+                        <div class="about-flow-cmd">cascade detect --config cascade.yaml</div>
                     </div>
                 </div>
                 <div class="about-flow-step">
@@ -1095,6 +1103,7 @@
                     <div class="about-flow-body">
                         <div class="about-flow-title">Commit &amp; Push</div>
                         <div class="about-flow-desc">Changes are staged and committed to the isolated branch. For GitHub repos, the branch is pushed to origin automatically.</div>
+                        <div class="about-flow-cmd">git add -A &amp;&amp; git commit -m "cascade: &lt;change&gt;" &amp;&amp; git push -u origin &lt;branch&gt;</div>
                     </div>
                 </div>
                 <div class="about-flow-step">
@@ -1108,13 +1117,93 @@
             </div>
         </div>
 
+        <!-- Architecture Diagram -->
+        <div class="about-section">
+            <div class="about-section-title"><span class="dot" style="background:var(--green)"></span> Architecture</div>
+            <div style="display:flex;flex-direction:column;gap:18px;">
+                <!-- Row 1: User layer -->
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                    <div style="background:var(--b-blue-bg);color:var(--b-blue-fg);border-radius:10px;padding:10px 18px;font-size:12px;font-weight:600;text-align:center;min-width:120px;">
+                        &#x1F464; Dashboard UI<br><span style="font-weight:400;opacity:.8;">localhost:8450</span>
+                    </div>
+                    <div style="background:var(--b-blue-bg);color:var(--b-blue-fg);border-radius:10px;padding:10px 18px;font-size:12px;font-weight:600;text-align:center;min-width:120px;">
+                        &#x2328; Cascade CLI<br><span style="font-weight:400;opacity:.8;">python -m cascade</span>
+                    </div>
+                </div>
+                <div style="text-align:center;color:var(--text-4);font-size:18px;">&#x25BC;</div>
+                <!-- Row 2: Dashboard -->
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                    <div style="background:var(--b-cyan-bg);color:var(--b-cyan-fg);border-radius:10px;padding:10px 18px;font-size:12px;font-weight:600;text-align:center;min-width:160px;">
+                        &#x1F5A5; FastAPI + WebSocket<br><span style="font-weight:400;opacity:.8;">REST API &bull; Real-time Events</span>
+                    </div>
+                </div>
+                <div style="text-align:center;color:var(--text-4);font-size:18px;">&#x25BC;</div>
+                <!-- Row 3: Core -->
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                    <div style="background:var(--b-green-bg);color:var(--b-green-fg);border-radius:10px;padding:8px 14px;font-size:11px;font-weight:600;text-align:center;">
+                        &#x1F50D; Detector<br><span style="font-weight:400;opacity:.8;">Schema drift scan</span>
+                    </div>
+                    <div style="background:var(--b-green-bg);color:var(--b-green-fg);border-radius:10px;padding:8px 14px;font-size:11px;font-weight:600;text-align:center;">
+                        &#x26A1; Propagator<br><span style="font-weight:400;opacity:.8;">Parallel pipeline</span>
+                    </div>
+                    <div style="background:var(--b-green-bg);color:var(--b-green-fg);border-radius:10px;padding:8px 14px;font-size:11px;font-weight:600;text-align:center;">
+                        &#x1F500; Git Ops<br><span style="font-weight:400;opacity:.8;">Branch &bull; commit &bull; diff</span>
+                    </div>
+                    <div style="background:var(--b-green-bg);color:var(--b-green-fg);border-radius:10px;padding:8px 14px;font-size:11px;font-weight:600;text-align:center;">
+                        &#x1F4E6; GitHub Ops<br><span style="font-weight:400;opacity:.8;">Clone &bull; push &bull; PR</span>
+                    </div>
+                </div>
+                <div style="text-align:center;color:var(--text-4);font-size:18px;">&#x25BC;</div>
+                <!-- Row 4: Cline + Repos -->
+                <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+                    <div style="border:2px solid var(--amber);border-radius:12px;padding:12px 16px;text-align:center;min-width:180px;">
+                        <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;">&#x1F916; Cline CLI</div>
+                        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                            <span style="background:var(--b-amber-bg);color:var(--b-amber-fg);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;">cline -y</span>
+                            <span style="background:var(--b-amber-bg);color:var(--b-amber-fg);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;">--json</span>
+                            <span style="background:var(--b-amber-bg);color:var(--b-amber-fg);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;">auth</span>
+                        </div>
+                        <div style="font-size:10px;color:var(--text-4);margin-top:4px;">via Cline API &bull; app.cline.bot</div>
+                    </div>
+                    <div style="border:2px solid var(--purple);border-radius:12px;padding:12px 16px;text-align:center;min-width:180px;">
+                        <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:4px;">&#x1F4E6; Repositories</div>
+                        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                            <span style="background:var(--b-purple-bg);color:var(--b-purple-fg);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;">Source</span>
+                            <span style="background:var(--b-purple-bg);color:var(--b-purple-fg);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;">Consumer 1</span>
+                            <span style="background:var(--b-purple-bg);color:var(--b-purple-fg);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;">Consumer N</span>
+                        </div>
+                        <div style="font-size:10px;color:var(--text-4);margin-top:4px;">Local or GitHub repos</div>
+                    </div>
+                </div>
+                <!-- Pipeline -->
+                <div style="margin-top:8px;padding:14px 18px;border-radius:10px;background:var(--bg-inset);border:1px solid var(--border);">
+                    <div style="font-size:11px;font-weight:600;color:var(--text-3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Per-Repo Pipeline</div>
+                    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:11px;font-weight:600;">
+                        <span style="background:var(--b-blue-bg);color:var(--b-blue-fg);border-radius:6px;padding:4px 10px;">&#x1F500; Branch</span>
+                        <span style="color:var(--text-4);">&rarr;</span>
+                        <span style="background:var(--b-amber-bg);color:var(--b-amber-fg);border-radius:6px;padding:4px 10px;">&#x1F916; Adapt</span>
+                        <span style="color:var(--text-4);">&rarr;</span>
+                        <span style="background:var(--b-green-bg);color:var(--b-green-fg);border-radius:6px;padding:4px 10px;">&#x1F9EA; Test</span>
+                        <span style="color:var(--text-4);">&rarr;</span>
+                        <span style="background:var(--b-red-bg);color:var(--b-red-fg);border-radius:6px;padding:4px 10px;">&#x1F527; Fix</span>
+                        <span style="color:var(--text-4);">&rarr;</span>
+                        <span style="background:var(--b-purple-bg);color:var(--b-purple-fg);border-radius:6px;padding:4px 10px;">&#x1F50D; Review</span>
+                        <span style="color:var(--text-4);">&rarr;</span>
+                        <span style="background:var(--b-cyan-bg);color:var(--b-cyan-fg);border-radius:6px;padding:4px 10px;">&#x1F4BE; Commit</span>
+                        <span style="color:var(--text-4);">&rarr;</span>
+                        <span style="background:var(--b-amber-bg);color:var(--b-amber-fg);border-radius:6px;padding:4px 10px;">&#x1F4E4; Push &amp; PR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Tech Stack -->
         <div class="about-section">
             <div class="about-section-title"><span class="dot" style="background:var(--purple)"></span> Tech Stack</div>
             <div class="about-tech-grid">
                 <div class="about-tech">
                     <div class="about-tech-icon">&#x1F916;</div>
-                    <div><div class="about-tech-name">Cline CLI</div><div class="about-tech-role">AI code agent orchestration</div></div>
+                    <div><div class="about-tech-name">Cline CLI + API</div><div class="about-tech-role">AI code agent orchestration &amp; authentication</div></div>
                 </div>
                 <div class="about-tech">
                     <div class="about-tech-icon">&#x1F40D;</div>
@@ -1160,6 +1249,14 @@
                     <div class="about-ref-text">
                         <div class="about-ref-title">Cline</div>
                         <div class="about-ref-url">cline.bot</div>
+                    </div>
+                    <div class="about-ref-arrow">&rarr;</div>
+                </a>
+                <a class="about-ref" href="https://app.cline.bot/dashboard/account?tab=api-keys" target="_blank">
+                    <div class="about-ref-icon">&#x1F511;</div>
+                    <div class="about-ref-text">
+                        <div class="about-ref-title">Cline API Keys Dashboard</div>
+                        <div class="about-ref-url">app.cline.bot/dashboard/account</div>
                     </div>
                     <div class="about-ref-arrow">&rarr;</div>
                 </a>
@@ -1487,7 +1584,11 @@ function propagate() {
     anTrack("ui.propagate", "Triggering demo propagation", "ui");
     setBadge("running", "Propagating...");
     appendLog(new Date().toLocaleTimeString(), "ev", "Starting propagation...");
-    fetch("/api/run?change=" + encodeURIComponent(change), { method: "POST" })
+    fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ change: change }),
+    })
         .then(function(r) { return r.json(); })
         .then(function(d) { if (d.error) { appendLog(new Date().toLocaleTimeString(), "err", "Run failed: " + d.error); setBadge("drift", "Error"); } })
         .catch(function(e) { appendLog(new Date().toLocaleTimeString(), "err", "Run error: " + e); });
@@ -1659,7 +1760,11 @@ function toggleGHRole(repoName) {
         if (ghRepos[i].name === repoName) {
             var newRole = ghRepos[i].role === "source" ? "consumer" : "source";
             ghRepos[i].role = newRole;
-            fetch("/api/github/update-role?repo_name=" + encodeURIComponent(repoName) + "&role=" + newRole, { method: "POST" });
+            fetch("/api/github/update-role", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ repo_name: repoName, role: newRole }),
+            });
             break;
         }
     }
@@ -1739,7 +1844,11 @@ function ghPropagate() {
     setBadge("running", "Propagating...");
     appendLog(new Date().toLocaleTimeString(), "ev", "Starting GitHub propagation...");
 
-    fetch("/api/github/run?change=" + encodeURIComponent(change), { method: "POST" })
+    fetch("/api/github/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ change: change }),
+    })
         .then(function(r) { return r.json(); })
         .then(function(d) {
             if (d.error) {

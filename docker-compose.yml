@@ -5,14 +5,20 @@ services:
     volumes:
       - .:/app
       - cascade-data:/root/.cascade
+      - cline-config:/root/.cline
       - cascade-workspace:/app/cascade/workspace
       - ${HOME}/.config/gh:/root/.config/gh:ro
     ports:
       - "8450:8450"
     environment:
       - CLINE_API_KEY=${CLINE_API_KEY:-}
-    entrypoint: ["python3", "-m", "cascade"]
-    command: ["dashboard", "--host", "0.0.0.0", "--port", "8450", "--config", "/app/demo/cascade.yaml"]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        if [ -n "$$CLINE_API_KEY" ] && ! grep -q '"clineApiKey"' /root/.cline/data/globalState.json 2>/dev/null; then
+          CI=true cline auth --provider cline --apikey "$$CLINE_API_KEY" --modelid "anthropic/claude-3.5-sonnet" 2>/dev/null || true
+        fi
+        python3 -m cascade dashboard --host 0.0.0.0 --port 8450 --config /app/demo/cascade.yaml
 
   cascade-run:
     build: .
@@ -20,6 +26,7 @@ services:
     volumes:
       - .:/app
       - cascade-data:/root/.cascade
+      - cline-config:/root/.cline
     environment:
       - CLINE_API_KEY=${CLINE_API_KEY:-}
     profiles:
@@ -29,4 +36,5 @@ services:
 
 volumes:
   cascade-data:
+  cline-config:
   cascade-workspace:

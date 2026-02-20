@@ -25,6 +25,7 @@ from typing import Any, Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 
 from ..core.cline import ClineWrapper
 from ..core.config import CascadeConfig, RepoConfig, Settings, load_config
@@ -189,6 +190,19 @@ def test_display_name():
     assert resp.status_code == 200
     assert resp.json()["display_name"] == "Alice Johnson"
 '''
+
+
+class GitHubImportRequest(BaseModel):
+    repos: list[str]
+    source_repo: str = ""
+
+class RunRequest(BaseModel):
+    change: str
+    config: Optional[str] = None
+
+class UpdateRoleRequest(BaseModel):
+    repo_name: str
+    role: str
 
 
 class Broadcaster:
@@ -363,11 +377,12 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
         return {"runs": run_history[-20:]}
 
     @app.post("/api/run")
-    async def api_run(change: str, config: Optional[str] = None):
+    async def api_run(body: RunRequest):
         if state["running"]:
             return {"error": "A run is already in progress"}
 
-        cfg_path = config or config_path
+        change = body.change
+        cfg_path = body.config or config_path
         if not cfg_path:
             return {"error": "No config path provided"}
 
@@ -416,13 +431,13 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
     }
 
     @app.post("/api/github/import")
-    async def api_github_import(
-        repos: list[str],
-        source_repo: str = "",
-    ):
+    async def api_github_import(body: GitHubImportRequest):
         """Clone GitHub repos, detect languages, build dynamic config."""
         if gh_state["cloning"]:
             return {"error": "Clone already in progress"}
+
+        repos = body.repos
+        source_repo = body.source_repo
 
         gh_state["cloning"] = True
         gh_state["repos"] = []
@@ -519,8 +534,9 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
             return {"status": "error", "change_summary": str(exc), "repos": []}
 
     @app.post("/api/github/run")
-    async def api_github_run(change: str):
+    async def api_github_run(body: RunRequest):
         """Run propagation on GitHub-imported repos, then push + create PRs."""
+        change = body.change
         if state["running"]:
             return {"error": "A run is already in progress"}
         if not gh_state["config"]:
@@ -648,8 +664,10 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
         }
 
     @app.post("/api/github/update-role")
-    async def api_github_update_role(repo_name: str, role: str):
+    async def api_github_update_role(body: UpdateRoleRequest):
         """Update the role of an imported GitHub repo (source/consumer)."""
+        repo_name = body.repo_name
+        role = body.role
         for r in gh_state["repos"]:
             if r["name"] == repo_name:
                 r["role"] = role
